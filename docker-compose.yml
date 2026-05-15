@@ -1,0 +1,22 @@
+version: '3'
+services:
+  fast-api:
+    build: fast-api/
+    tty: true
+    stdin_open: true
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./fast-api:/fast-api
+  react-native:
+    build:
+      context: ./react-native
+    working_dir: /react-native  # コンテナ内の作業ディレクトリ
+    tty: true
+    stdin_open: true
+    command: /bin/bash          # プロジェクト作成前なのでbashで維持
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./react-native:/react-native # ローカルとコンテナ内を一致させる
