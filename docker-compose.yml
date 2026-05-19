@@ -20,3 +20,4 @@ services:
       - "3000:3000"
     volumes:
       - ./react-native:/react-native # ローカルとコンテナ内を一致させる
+      - /react-native/node_modules
