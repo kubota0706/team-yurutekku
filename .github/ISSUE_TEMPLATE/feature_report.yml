@@ -1,0 +1,78 @@
+name: 🚀 新機能開発・タスク / Feature Development
+description: 新しい機能の開発やタスクのイシューを作成します。
+title: "[feat]: "
+labels: ["enhancement"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## 🚀 新機能開発テンプレート / Feature Development Template
+        Issueを作成していただきありがとうございます。開発の目的やタスクの明確化のため、以下の項目への入力をお願いします。
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: 📝 概要 / Summary
+      description: 何を開発するのか、簡潔に記述してください。
+      placeholder: |
+        例：〇〇機能の実装（画面表示、API連携、コンポーネント作成など）。
+        ユーザーが〇〇の操作を行った際に、〇〇の処理が正しく実行され、画面に結果が反映される基本機能を実装します。
+    validations:
+      required: true
+
+  - type: textarea
+    id: purpose
+    attributes:
+      label: 🎯 目的・なぜやるのか / Purpose & Background
+      description: この開発を行う背景や、得られるメリットを記述してください。
+      placeholder: |
+        - ユーザーの利便性向上、またはシステムの堅牢性を高めるため。
+        - 〇〇の仕様変更に伴い、既存のロジックを追従・最適化する必要があるため。
+    validations:
+      required: true
+
+  - type: textarea
+    id: tasks
+    attributes:
+      label: ✅ やること / Task List
+      description: 開発に必要なステップをチェックボックス形式で記述してください（作成後、画面上でチェック可能です）。
+      value: |
+        - [ ] 要件定義・基本設計の確認（コンポーネント構造やデータフローの整理）
+        - [ ] フロントエンド / バックエンドのロジック実装・コンポーネント作成
+        - [ ] 例外処理およびエラーハンドリングの実装（ログ出力やバリデーションなど）
+        - [ ] 不要な重複コードの共通化、およびファイル構成の整理
+    validations:
+      required: true
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: 🧪 確認方法 / Testing
+      description: 実装完了後、どのように動作確認を行う予定か記述してください。
+      value: |
+        - [ ] ローカル環境でスクリプト・サーバーを実行し、想定通りに動作すること
+        - [ ] 境界値の入力や異常系の操作に対して、エラーハンドリングが正しく機能すること
+        - [ ] コンソールやログファイルに予期せぬエラーが出力されていないこと
+    validations:
+      required: true
+
+  - type: input
+    id: parent_issue
+    attributes:
+      label: 🔗 親イシュー（任意） / Parent Issue (Optional)
+      description: このタスクが特定の大枠（親イシュー）に属する場合、そのIssue番号を記述してください。
+      placeholder: "#1"
+    validations:
+      required: false
+
+  - type: textarea
+    id: notes
+    attributes:
+      label: 📌 備考・関連情報 / Notes & References
+      description: 注意点、参考URL、あるいは開発の進め方に関するメモがあれば記述してください。
+      placeholder: |
+        例：実装の過程で、プルリクエストやブランチ運用のルールなど、チーム内の共通ドキュメントに追記・修正を行う可能性があります。
+        関連する参考URLや、先行して実装されている類似機能のコードがあればここに記載します。
+    validations:
+      required: false
