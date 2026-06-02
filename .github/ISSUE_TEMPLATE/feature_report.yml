@@ -1,6 +1,6 @@
 name: 🚀 新機能開発・タスク / Feature Development
 description: 新しい機能の開発やタスクのイシューを作成します。
-title: "[feat]: "
+title: "[Feat] "
 labels: ["enhancement"]
 assignees: []
 body:
