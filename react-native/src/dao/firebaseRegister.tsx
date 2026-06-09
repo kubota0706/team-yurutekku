@@ -8,9 +8,8 @@ import { ProfileData } from '@/atoms/profileAtom';
  * ユーザープロフィール情報をFirestoreに登録するDAO関数
  * @param profileData Jotaiのフォームデータ
  */
-export const insertUserProfile = async (profileData: ProfileData): Promise<void> => {
+export const insertUserProfile = async (profileData: ProfileData, uid: string): Promise<void> => {
   // テスト用固定UID
-  const uid = 'test';
 
   // 物理名とデータ型の設計に100%合わせたオブジェクト構造
   const userDocument = {
