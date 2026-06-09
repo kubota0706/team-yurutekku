@@ -6,12 +6,11 @@ import { ProfileData } from '@/atoms/profileAtom';
  * Firestoreからユーザープロフィール情報を取得するDAO関数
  * @returns 取得したプロフィールデータ、または存在しない場合はnull
  */
-export const getUserProfile = async (): Promise<ProfileData | null> => {
-  const uid = 'test'; // テスト用の固定UID
+const getUserProfile = async (uid: string, version: number): Promise<ProfileData | null> => {
 
   try {
-    const userDocRef = doc(db, 'users', uid);
-    const docSnap = await getDoc(userDocRef);
+    const profileDocRef = doc(db, 'profile', `${uid}-${version}`);
+    const docSnap = await getDoc(profileDocRef);
 
     if (docSnap.exists()) {
       const data = docSnap.data();
