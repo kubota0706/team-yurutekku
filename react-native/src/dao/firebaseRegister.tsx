@@ -20,15 +20,22 @@ export const insertUserProfile = async (profileData: ProfileData): Promise<void>
     bio: profileData.bio,                               // 自己紹介文 (必須)
     gender: profileData.gender,                         // 性別 (必須)
     connectAdd: profileData.connectAdd,
-    version: 1,                                         // バージョン (一旦1固定)
+    version: 1,                                         // バージョン (初回の登録のため1を指定)
     createdAt: serverTimestamp(),                       // サーバー側で刻む正確な作成日時
     updatedAt: serverTimestamp(),                       // サーバー側で刻む正確な更新日時
   };
 
+  const userMetaDocument = {
+    version: userDocument.version,
+    updatedAt: serverTimestamp(),
+  }
+
   try {
     // usersコレクションの 'test' ドキュメントに対してデータを書き込み（既存があればマージ）
-    const userDocRef = doc(db, 'users', uid);
+    const userDocRef = doc(db, 'profile', `${uid}-${userDocument.version}`);
+    const userMetaDocRef = doc(db, 'user-meta', uid)
     await setDoc(userDocRef, userDocument, { merge: true });
+    await setDoc(userMetaDocRef, userMetaDocument, {merge: true} )
     console.log(`[DAO] Firestoreへの登録成功 (uid: ${uid})`);
   } catch (error) {
     console.error('[DAO] Firestoreへの書き込みに失敗しました:', error);
