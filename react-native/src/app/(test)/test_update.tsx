@@ -79,7 +79,7 @@ export default function TestUpdateScreen() {
       };
 
       // 4. Firestoreへの書き込み実行
-      await insertUserProfile(finalProfileData);
+      await insertUserProfile(finalProfileData, "test");
 
       console.log('[TestView] すべての更新処理が正常に完了しました。');
       Alert.alert('成功', 'プロフィールの更新に成功しました！(UID: test)');
