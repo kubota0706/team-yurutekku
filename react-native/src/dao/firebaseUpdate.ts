@@ -1,13 +1,15 @@
 import { db } from './firebaseConfig'; 
-import { doc, setDoc, serverTimestamp, getDoc, collection, addDoc, updateDoc } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDoc, updateDoc } from 'firebase/firestore';
 import { ProfileData } from '@/atoms/profileAtom';
+import { getLatestData } from '@/dao/firebaseGet'
+import { version } from 'react';
 
 /**
  * ユーザープロフィール情報をFirestoreに登録・更新するDAO関数
  * （画像はアップロードせず、渡されたパスをそのまま保存します）
  */
-export const insertUserProfile = async (profileData: ProfileData): Promise<void> => {
-  const uid = 'test';
+export const insertUserProfile = async (profileData: ProfileData, uid: string): Promise<void> => {
+  getLatestData(uid)
 
   // DateオブジェクトをFirestoreが扱える形式（またはnull）に整理
   const formattedBirthday = profileData.birthday instanceof Date ? profileData.birthday : null;
@@ -16,56 +18,57 @@ export const insertUserProfile = async (profileData: ProfileData): Promise<void>
   const baseDocument = {
     userName: profileData.userName ?? '',                 // nullなら空文字
     birthday: formattedBirthday,                          // Date型 または null
-    // 💡 変更点：渡ってきたローカルパス（または既存のURL）をそのまま突っ込む
     iconImagePath: profileData.iconImagePath ?? '',       
     bio: profileData.bio ?? '',                           // nullなら空文字
     gender: profileData.gender ?? null,                   // null許容
     connectAdd: profileData.connectAdd ?? null,           // null許容
     version: 1,                                           // バージョン (一旦1固定)
     updatedAt: serverTimestamp(),                         // 更新日時は常に最新にする
+    createdAt: null,
   };
 
   try {
-    const userDocRef = doc(db, 'users', uid);
-    // 既存データがあればマージ、なければ新規作成
-    const userDocSnap = await getDoc(userDocRef);
+    // 最新のバージョンがどこかuser-metaから取得
+    const metaDocRef = doc(db, 'user-meta', uid);   // 接続先設定
+    const metaDocSnap = await getDoc(metaDocRef);   // 取得
+    // データ存在チェック
+    if (!metaDocSnap.exists()) throw("メタデータが見つかりません");
 
-    if (userDocSnap.exists()) {
-        // ----------------------------------------------------
-        // 既存データがある場合：バックアップを取ってからアップデート
-        // ----------------------------------------------------
-        const currentData = userDocSnap.data();
+    // バージョンというキーで保存されているか、存在チェック
+    const metaData = metaDocSnap.data();
+    if (!('version' in metaData)) throw("バージョン情報が保存されていません")
+    const version = metaData.version;
 
-        // uidキー直下のサブコレクション「history」の参照を作成
-        const historyDocRef = doc(db, 'users', uid, 'history', String(currentData.version));
-
-        // 引っ張ってきたデータをそのままサブコレクションに突っ込む
-        await setDoc(historyDocRef, {
-            ...currentData,
-            archivedAt: serverTimestamp() // 念のためフィールドとしても時間を残しておくと便利
-        });
-        console.log('バックアップ成功！');
-        
-        baseDocument.version = currentData.version + 1;
-
-        // 本番のアップデート処理を実行（createdAtは上書きしない）
-        await updateDoc(userDocRef, baseDocument);
-
-    } else {
-      // ----------------------------------------------------
-      // 新規作成の場合：createdAtを添えて保存
-      // ----------------------------------------------------
-      console.log('既存のユーザーデータが存在しません（新規作成）');
-      
-      const newDocument = {
-        ...baseDocument,
-        createdAt: serverTimestamp(), // 新規作成時のみセット
-      };
-
-      await setDoc(userDocRef, newDocument, { merge: true });
+    // user-metaのバージョン更新用オブジェクト
+    const metaBaseDocument = {
+      updatedAt: serverTimestamp(),
+      version: null
     }
-    
-    console.log(`[DAO] Firestoreへの登録・更新成功 (uid: ${uid})`);
+
+    // 接続先ドキュメント
+    const profDoc = `${uid}-${version}`
+    // ドキュメントリファレンスを設定
+    const profileDocRef = doc(db, 'profile', profDoc);
+    // リファレンスを参照しスナップショットを取得
+    const profileDocSnap = await getDoc(profileDocRef);
+    if (!profileDocSnap.exists()) throw("プロフィールが登録されていません　まず新規登録を行ってください");
+
+    const data = profileDocSnap.data(); // データを取得
+    // 作成日時を取得、設定
+    baseDocument.createdAt = data?.createdAt;
+
+    // 次のバージョン計算
+    const newVersion = version + 1;
+    const newProfileDocRef = doc(db, 'profile', `${uid}-${newVersion}`) // 計算したバージョンをドキュメントのキーへ
+    // 保存
+    await setDoc(newProfileDocRef, baseDocument);
+
+    // user-metaのバージョンを更新
+    metaBaseDocument.version = newVersion;
+    await setDoc(metaDocRef, metaBaseDocument);
+
+    console.log('[DAO] プロフィールの更新に成功しました')
+
   } catch (error) {
     console.error('[DAO] Firestoreへの書き込みに失敗しました:', error);
     throw error;
