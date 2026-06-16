@@ -3,101 +3,136 @@ import { StyleSheet, Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 
 export const loginStyles = StyleSheet.create({
-  // 画面全体の背景（黄色）
   container: {
     flex: 1,
-    width: '100%',
-    height: '100%',
-    backgroundColor: '#FFE86C', // 🌟 ここでベースの黄色を塗る！
-    alignItems: 'center',
+    backgroundColor: '#FFE352', // カンプの鮮やかな黄色
     justifyContent: 'center',
-  },
-  // 「ろご」未確定（画像）
-  
-  // 中央の白いカード
-  card: {
-    width: width * 0.85,
-    backgroundColor: '#FFFEF0', // 少し温かみのある白
-    borderRadius: 36,         // しっかりとした丸み
-    padding: 24,
     alignItems: 'center',
-    borderWidth: 4,
-    borderColor: '#FFDD00',    // カードの黄色いフチ
-    // Windows/Android用の影
-    elevation: 8,
-    // iOS用の影
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.15,
-    shadowRadius: 12,
   },
-  // 「ログイン」の見出し
-  cardTitle: {
-    fontSize: 28,
+  bgCircle: {
+    position: 'absolute',
+    backgroundColor: '#FFF19E', // 背景に浮いている薄い黄色の円
+    opacity: 0.6,
+  },
+  logoText: {
+    fontSize: 56,
     fontWeight: 'bold',
-    color: '#5C4017', // 焦げ茶色の文字
-    marginBottom: 20,
+    color: '#FFFFFF',
+    marginBottom: 24,
+    letterSpacing: 4,
   },
-  // 入力エリアのまとまり
+  card: {
+    width: width * 0.88,
+    backgroundColor: '#FFFDF0', // カンプ特有の、少し温かみのあるアイボリーホワイト
+    borderRadius: 36, // カンプのような大きな丸み
+    paddingTop: 32,
+    paddingHorizontal: 24,
+    paddingBottom: 36,
+    alignItems: 'center',
+    // 影の設定（カンプの下側のやわらかいシャドウ）
+    shadowColor: '#A38F1A',
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.3,
+    shadowRadius: 16,
+    elevation: 10,
+  },
+  cardTitle: { 
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#332211', // 少し茶色みがかった柔らかい黒
+    marginBottom: 20,
+    letterSpacing: 2,
+  },
   inputContainer: {
     width: '100%',
-    marginBottom: 12,
+    marginBottom: 14,
   },
-  // 「メールアドレス」「パスワード」のラベル
   inputLabel: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#5C4017',
-    marginBottom: 4,
+    color: '#553311',
+    marginBottom: 6,
+    paddingLeft: 4,
   },
-  // テキスト入力枠
   input: {
     width: '100%',
     height: 48,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#5C4017', // 茶色のフチ線
+    borderWidth: 1.5,
+    borderColor: '#443322', // クレよんのような可愛い黒い細枠
     borderRadius: 12,
+    backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     fontSize: 16,
-    color: '#333333',
   },
-  // 「パスワードが不明な場合」のリンク
-  forgotText: {
-    alignSelf: 'flex-end',
-    fontSize: 12,
-    color: '#5C4017',
+  forgotContainer: {
+    width: '100%',
+    alignItems: 'flex-end',
     marginBottom: 24,
   },
-  // ログインボタン（青色）
+  forgotText: {
+    fontSize: 13,
+    fontWeight: 'bold',
+    color: '#553311',
+    textDecorationLine: 'underline', // 下線
+  },
   loginButton: {
-    width: '80%',
-    height: 52,
-    backgroundColor: '#419AFF', // 爽やかな青色
-    borderRadius: 26,         // 完全なカプセル型
+    width: '70%',
+    height: 54,
+    backgroundColor: '#4293FF', // カンプ通りの爽やかな青
+    borderRadius: 27,
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   loginButtonText: {
     color: '#FFFFFF',
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
+    letterSpacing: 2,
   },
-  // 新規登録ボタン（白ベース・青フチ）
   registerButton: {
-    width: '80%',
-    height: 52,
+    width: '70%',
+    height: 54,
     backgroundColor: '#FFFFFF',
-    borderWidth: 3,
-    borderColor: '#419AFF',
+    borderWidth: 2,
+    borderColor: '#4293FF', // 青いフチ取り
+    borderRadius: 27,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+  registerButtonText: {
+    color: '#4293FF',
+    fontSize: 16,
+    fontWeight: 'bold',
+    letterSpacing: 2,
+  },
+  
+  // 🌟 ここから下が結合されたSNS用のスタイルです
+  snsButtonRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 18,
+    width: '100%',
+  },
+  snsButton: {
+    width: 52,
+    height: 52,
     borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
+    borderWidth: 1.5,
+    borderColor: '#E0DCC5',
   },
-  registerButtonText: {
-    color: '#419AFF',
-    fontSize: 18,
-    fontWeight: 'bold',
+  googleButton: {
+    backgroundColor: '#FFFFFF',
+  },
+  appleButton: {
+    backgroundColor: '#000000',
+    borderColor: '#000000', // 白いフチが見えないよう背景と同色に調整
+  },
+  discordButton: {
+    backgroundColor: '#5865F2',
+    borderColor: '#5865F2', // 枠線をDiscordカラーに同化
   },
 });
