@@ -13,15 +13,9 @@ export const registerStyles = StyleSheet.create({
 }, // 全体をラップしてボタンを下に押し出す
   
   titleContainer: { marginTop: 40, marginBottom: 40, alignItems: 'center' },
-  cardTitle: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    // ストロークの代わりとして影を重ねて太く見せる
-    textShadowColor: 'black',
-    textShadowOffset: { width: 2, height: 2 },
-    textShadowRadius: 0,
-    marginVertical: 20,
+  headerImage: {
+    width: 200,    // 実際の画像の幅に合わせて調整してください
+    height: 50,    // 実際の画像の高さに合わせて調整してください
   },
   
   stepContent: { width: '100%' },
@@ -33,8 +27,8 @@ export const registerStyles = StyleSheet.create({
   inputLabel: { fontSize: 14, fontWeight: 'bold', color: '#553311', marginBottom: 6, paddingLeft: 4 },
   inputRow: { flexDirection: 'row', gap: 12 },
   
-  halfInput: { flex: 1, height: 48, borderWidth: 1.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 12, fontSize: 16 },
-  dateInput: { flex: 1, height: 48, borderWidth: 1.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 8, fontSize: 16, textAlign: 'center' },
+  halfInput: { flex: 1, height: 48, borderWidth: 4.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 12, fontSize: 16 },
+  dateInput: { flex: 1, height: 48, borderWidth: 4.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 8, fontSize: 16, textAlign: 'center' },
   
 //   genderButton: { flex: 1, height: 48, borderWidth: 1.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
 //   genderButtonSelected: { backgroundColor: '#332211', borderColor: '#332211' },
@@ -43,7 +37,7 @@ export const registerStyles = StyleSheet.create({
   genderButton: {
     flex: 1,
     height: 48,
-    borderWidth: 1.5,
+    borderWidth: 4.5,
     borderColor: '#443322',
     borderRadius: 12,
     backgroundColor: '#FFFFFF', // 白背景
@@ -61,7 +55,7 @@ export const registerStyles = StyleSheet.create({
     color: '#443322', // 通常時の文字色
   },
   
-  selectInput: { width: '100%', height: 48, borderWidth: 1.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
+  selectInput: { width: '100%', height: 48, borderWidth: 4.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 12, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   selectText: { fontSize: 16, color: '#333' },
   selectTextPlaceholder: { color: '#A0A0A0' },
   

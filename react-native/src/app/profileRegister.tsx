@@ -1,32 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, Modal, FlatList, TouchableWithoutFeedback, Keyboard, ScrollView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, ImageBackground, Modal, FlatList, TouchableWithoutFeedback, Keyboard, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { registerStyles as styles } from '@/styles/registerStyles';
 
 const PREFECTURES = ['北海道', '青森県', '岩手県', '宮城県', '福島県', '東京都', '神奈川県', '大阪府'];
-
-
-const OutlinedText = ({ text, style }: { text: string; style: any }) => {
-  const shadowStyle = {
-    color: 'black',
-    textShadowColor: '#3E2723',
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 1,
-  };
-
-  return (
-    <View>
-      {/* 4方向に影をずらして重ねることで縁取りを表現 */}
-      <Text style={[style, shadowStyle, { position: 'absolute', top: -2, left: -2 }]}>{text}</Text>
-      <Text style={[style, shadowStyle, { position: 'absolute', top: -2, left: 2 }]}>{text}</Text>
-      <Text style={[style, shadowStyle, { position: 'absolute', top: 2, left: -2 }]}>{text}</Text>
-      <Text style={[style, shadowStyle, { position: 'absolute', top: 2, left: 2 }]}>{text}</Text>
-      {/* メインの文字 */}
-      <Text style={style}>{text}</Text>
-    </View>
-  );
-};
 
 // --- 画面専用の部品コンポーネント ---
 
@@ -95,7 +73,11 @@ export default function RegisterScreen() {
             <View style={styles.contentWrapper}>
               
               <View style={styles.titleContainer}>
-                <OutlinedText text="新規登録" style={styles.cardTitle} />
+                <Image 
+                  source={require('@/assets/register-text.png')} 
+                  style={styles.headerImage} 
+                  resizeMode="contain"
+                />
               </View>
               
               <View style={styles.stepContent}>
