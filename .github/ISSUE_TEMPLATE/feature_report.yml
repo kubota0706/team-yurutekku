@@ -1,6 +1,6 @@
 name: 🚀 新機能開発・タスク / Feature Development
 description: 新しい機能の開発やタスクのイシューを作成します。
-title: "[feat]: "
+title: "[Feat] "
 labels: ["enhancement"]
 assignees: []
 body:
@@ -37,7 +37,7 @@ body:
     attributes:
       label: ✅ やること / Task List
       description: 開発に必要なステップをチェックボックス形式で記述してください（作成後、画面上でチェック可能です）。
-      value: |
+      placeholder: |
         - [ ] 要件定義・基本設計の確認（コンポーネント構造やデータフローの整理）
         - [ ] フロントエンド / バックエンドのロジック実装・コンポーネント作成
         - [ ] 例外処理およびエラーハンドリングの実装（ログ出力やバリデーションなど）
@@ -50,7 +50,7 @@ body:
     attributes:
       label: 🧪 確認方法 / Testing
       description: 実装完了後、どのように動作確認を行う予定か記述してください。
-      value: |
+      placeholder: |
         - [ ] ローカル環境でスクリプト・サーバーを実行し、想定通りに動作すること
         - [ ] 境界値の入力や異常系の操作に対して、エラーハンドリングが正しく機能すること
         - [ ] コンソールやログファイルに予期せぬエラーが出力されていないこと

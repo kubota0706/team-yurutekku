@@ -2,7 +2,7 @@ import { useAtom } from 'jotai';
 import { profileDataAtom, currentStepAtom, ProfileData, StepType } from '@/atoms/profileAtom';
 import { router } from 'expo-router';
 import { insertUserProfile } from '@/dao/firebaseRegister';
-import { getLatestData } from '@/dao/firebaseGet';
+import { getUserProfile } from '@/dao/firebaseGet';
 
 // 💡 画面の並び順（Atomの型と完全一致させる）
 const STEP_LISTS: readonly StepType[] = [
@@ -45,7 +45,7 @@ export const useProfileForm = () => {
     try {
       console.log('保存を開始します。最終データ:', profileData);
       
-      await insertUserProfile(profileData, "test");
+      await insertUserProfile(profileData);
       
       router.replace('/'); 
     } catch (error) {
@@ -56,7 +56,7 @@ export const useProfileForm = () => {
 
   const loadProfileFromFirestore = async () => {
     try {
-      const data = await getLatestData("test");
+      const data = await getUserProfile();
       if (data) setProfileData(data);
     } catch (error) {
       console.error('読み込み失敗:', error);
