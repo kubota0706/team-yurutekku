@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Modal, FlatList, TouchableWithoutFeedback, Keyboard, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { registerStyles as styles } from '@/styles/registerStyles';
+import { registerStyles as styles } from '@/styles/profileRegisterBaseStyles';
 
 const PREFECTURES = ['北海道', '青森県', '岩手県', '宮城県', '福島県', '東京都', '神奈川県', '大阪府'];
 
