@@ -2,7 +2,10 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, ImageBackground, Modal, FlatList, TouchableWithoutFeedback, Keyboard, ScrollView, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { useAtom } from 'jotai';
 import { registerStyles as styles } from '@/styles/profileRegisterBaseStyles';
+import { profileDocAtom, ProfileDoc } from '@/atoms/profileDocAtom';
+import { registerProfileBase } from '@/dao/firebaseRegister';
 
 const PREFECTURES = ['北海道', '青森県', '岩手県', '宮城県', '福島県', '東京都', '神奈川県', '大阪府'];
 
@@ -45,17 +48,43 @@ const LocationModal = ({ visible, onClose, onSelect }: { visible: boolean, onClo
 export default function RegisterScreen() {
   const [step, setStep] = useState(1);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [profileDoc, setProfileDoc] = useAtom(profileDocAtom);
+
   const [formData, setFormData] = useState({
     lastName: '', firstName: '', lastNameKana: '', firstNameKana: '',
     birthYear: '', birthMonth: '', birthDay: '', gender: null as string | null, location: '',
   });
 
   const updateForm = (key: keyof typeof formData, value: any) => setFormData({ ...formData, [key]: value });
-  const handleNext = () => {
+
+  const updateProfileDoc = (data: Partial<ProfileDoc>) => {
+    setProfileDoc((prev) => ({ ...prev, ...data }));
+  };
+
+  const handleNext = async () => {
       if (step < 3) {
         setStep(step + 1);
       } else {
-        alert('登録完了');
+        const combinedProfile: ProfileDoc = {
+          ...profileDoc,
+          uid: 'test3',
+          userName: `${formData.lastName} ${formData.firstName}`.trim() || null,
+          gender: formData.gender === '男' ? 'male' : formData.gender === '女' ? 'female' : null,
+          birthday: formData.birthYear && formData.birthMonth && formData.birthDay
+            ? new Date(Number(formData.birthYear), Number(formData.birthMonth) - 1, Number(formData.birthDay))
+            : null,
+          connectAdd: formData.location || null,
+          updatedAt: new Date(),
+        };
+
+        try {
+          updateProfileDoc(combinedProfile);
+          await registerProfileBase(combinedProfile);
+          alert('登録完了');
+        } catch (error) {
+          console.error('登録に失敗しました:', error);
+          alert('登録中にエラーが発生しました');
+        }
       }
     };
 

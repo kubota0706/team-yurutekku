@@ -3,6 +3,7 @@ import { db } from './firebaseConfig';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { ProfileData } from '@/atoms/profileAtom';
+import { ProfileDoc } from '@/atoms/profileDocAtom';
 
 /**
  * ユーザープロフィール情報をFirestoreに登録するDAO関数
@@ -36,6 +37,33 @@ export const insertUserProfile = async (profileData: ProfileData): Promise<void>
   }
 };
 
+export const registerProfileBase = async (profileData: ProfileDoc): Promise<void> => {
+  if (!profileData.uid) {
+    throw new Error('uid が設定されていません。Firestore ドキュメントキーを指定してください。');
+  }
+
+  const profileDocRef = doc(db, 'profile', `${profileData.uid}-1`);
+  const profileDocument = {
+    uid: profileData.uid,
+    userName: profileData.userName ?? '',
+    gender: profileData.gender ?? null,
+    birthday: profileData.birthday instanceof Date ? profileData.birthday : null,
+    iconImagePath: profileData.iconImagePath ?? null,
+    bio: profileData.bio ?? null,
+    connectAdd: profileData.connectAdd ?? null,
+    version: 1,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+  };
+
+  try {
+    await setDoc(profileDocRef, profileDocument);
+    console.log(`[DAO] profile ドキュメント登録成功 (${profileData.uid}-1)`);
+  } catch (error) {
+    console.error('[DAO] profile ドキュメント登録に失敗しました:', error);
+    throw error;
+  }
+}
 /**
  * 端末内の画像ファイルをFirebase Storageにアップロードし、公開URLを取得する関数
  * @param localUri ImagePicker等で取得した端末内のローカルパス (file://...)
