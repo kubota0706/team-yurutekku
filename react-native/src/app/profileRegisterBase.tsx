@@ -1,229 +1,276 @@
-import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ImageBackground, Modal, FlatList, TouchableWithoutFeedback, Keyboard, ScrollView, Image } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Ionicons } from '@expo/vector-icons';
-import { useAtom } from 'jotai';
-import { registerStyles as styles } from '@/styles/profileRegisterBaseStyles';
-import { profileDocAtom } from '@/atoms/profileDocAtom';
-import { ProfileDoc } from '@/types/firebaseDoc';
-import { registerProfileBase } from '@/dao/firebaseRegister';
-import ActionButtons from '@/components/ActionButtons';
+import React from "react";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ImageBackground,
+  Modal,
+  FlatList,
+  TouchableWithoutFeedback,
+  Keyboard,
+  ScrollView,
+  Image,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { Ionicons } from "@expo/vector-icons";
 
-const PREFECTURES = ['北海道', '青森県', '岩手県', '宮城県', '福島県', '東京都', '神奈川県', '大阪府'];
+import { registerStyles as styles } from "@/styles/profileRegisterBaseStyles";
+import { ActionButtons } from "@/components/ActionButtons";
+import { useProfileForm } from "@/hooks/useProfileRegisterBaseForm";
+import { PREFECTURES } from "@/constants/prefectures";
+import LocationModal from "@/components/prefecturesModal";
 
 // --- 画面専用の部品コンポーネント ---
 
-const GenderButton = ({ label, isSelected, onPress }: { label: string, isSelected: boolean, onPress: () => void }) => (
-  <TouchableOpacity style={[styles.genderButton, isSelected && styles.genderButtonSelected]} onPress={onPress}>
+const GenderButton = ({
+  label,
+  isSelected,
+  onPress,
+}: {
+  label: string;
+  isSelected: boolean;
+  onPress: () => void;
+}) => (
+  <TouchableOpacity
+    style={[styles.genderButton, isSelected && styles.genderButtonSelected]}
+    onPress={onPress}
+  >
     <Text style={styles.genderButtonText}>{label}</Text>
   </TouchableOpacity>
-);
-
-const LocationModal = ({ visible, onClose, onSelect }: { visible: boolean, onClose: () => void, onSelect: (val: string) => void }) => (
-  <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
-    <TouchableWithoutFeedback onPress={onClose}>
-      <View style={styles.modalOverlay}>
-        <TouchableWithoutFeedback>
-          <View style={styles.modalContent}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>出身地を選択</Text>
-              <TouchableOpacity onPress={onClose}><Ionicons name="close" size={24} color="#333" /></TouchableOpacity>
-            </View>
-            <FlatList
-              data={PREFECTURES}
-              keyExtractor={(item) => item}
-              renderItem={({ item }) => (
-                <TouchableOpacity style={styles.prefOption} onPress={() => onSelect(item)}>
-                  <Text style={styles.prefOptionText}>{item}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </View>
-        </TouchableWithoutFeedback>
-      </View>
-    </TouchableWithoutFeedback>
-  </Modal>
 );
 
 // --- メイン画面コンポーネント ---
 
 export default function RegisterScreen() {
-  const [step, setStep] = useState(1);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
-  const [profileDoc, setProfileDoc] = useAtom(profileDocAtom);
-
-  const [formData, setFormData] = useState({
-    lastName: '', firstName: '', lastNameKana: '', firstNameKana: '',
-    birthYear: '', birthMonth: '', birthDay: '', gender: null as string | null, location: '',
-  });
-  const [confirmErrorMessage, setConfirmErrorMessage] = useState('');
-
-  const updateForm = (key: keyof typeof formData, value: any) => setFormData({ ...formData, [key]: value });
-
-  const updateProfileDoc = (data: Partial<ProfileDoc>) => {
-    setProfileDoc((prev) => ({ ...prev, ...data }));
-  };
-
-  const getConfirmValidation = () => {
-    const missingName = !formData.lastName.trim() || !formData.firstName.trim();
-    const missingKana = !formData.lastNameKana.trim() || !formData.firstNameKana.trim();
-    const missingBirthday = !formData.birthYear.trim() || !formData.birthMonth.trim() || !formData.birthDay.trim();
-    const missingGender = !formData.gender;
-    const missingLocation = !formData.location.trim();
-    const hasMissing = missingName || missingKana || missingBirthday || missingGender || missingLocation;
-
-    return { missingName, missingKana, missingBirthday, missingGender, missingLocation, hasMissing };
-  };
-
-  const handleNext = async () => {
-      if (step < 3) {
-        setConfirmErrorMessage('');
-        setStep(step + 1);
-      } else {
-        const validation = getConfirmValidation();
-        if (validation.hasMissing) {
-          setConfirmErrorMessage('未入力の項目があります');
-          return;
-        }
-
-        setConfirmErrorMessage('');
-        const combinedProfile: ProfileDoc = {
-          ...profileDoc,
-          uid: 'test3',
-          userName: `${formData.lastName} ${formData.firstName}`.trim() || null,
-          gender: formData.gender === '男' ? 'male' : formData.gender === '女' ? 'female' : null,
-          birthday: new Date(Number(formData.birthYear), Number(formData.birthMonth) - 1, Number(formData.birthDay)),
-          connectAdd: formData.location || null,
-          updatedAt: new Date(),
-        };
-
-        try {
-          updateProfileDoc(combinedProfile);
-          await registerProfileBase(combinedProfile);
-          alert('登録完了');
-        } catch (error) {
-          console.error('登録に失敗しました:', error);
-          // alert('登録中にエラーが発生しました');
-          setConfirmErrorMessage('登録中に予期せぬエラーが発生しました');
-        }
-      }
-    };
-
-    const handleBack = () => {
-      if (step > 1) {
-        setStep(step - 1);
-      }
-    };
+  const {
+    step,
+    formData,
+    showLocationPicker,
+    setShowLocationPicker,
+    confirmErrorMessage,
+    updateForm,
+    getConfirmValidation,
+    handleNext,
+    handleBack,
+  } = useProfileForm();
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <ImageBackground source={require('@/assets/app-bg.png')} style={styles.container}>
+      <ImageBackground
+        source={require("@/assets/app-bg.png")}
+        style={styles.container}
+      >
         <SafeAreaView style={styles.safeArea}>
-          <ScrollView contentContainerStyle={{ flexGrow: 1 }} showsVerticalScrollIndicator={false} scrollEnabled={false} style={{marginTop: -40}}>
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            showsVerticalScrollIndicator={false}
+            scrollEnabled={false}
+            style={{ marginTop: -40 }}
+          >
             <View style={styles.contentWrapper}>
-              
               <View style={styles.titleContainer}>
-                <Image 
-                  source={require('@/assets/register-text.png')} 
-                  style={styles.headerImage} 
+                <Image
+                  source={require("@/assets/register-text.png")}
+                  style={styles.headerImage}
                   resizeMode="contain"
                 />
               </View>
-              
+
               <View style={styles.stepContent}>
                 {step !== 3 && (
                   <>
-                  {step === 1 && (
-                    <>
-                      <View style={styles.inputContainerLarge}><Text style={styles.inputLabel}>名前</Text>
-                        <View style={styles.inputRow}>
-                          <TextInput style={styles.halfInput} placeholder="姓" value={formData.lastName} onChangeText={(v) => updateForm('lastName', v)} />
-                          <TextInput style={styles.halfInput} placeholder="名" value={formData.firstName} onChangeText={(v) => updateForm('firstName', v)} />
+                    {step === 1 && (
+                      <>
+                        <View style={styles.inputContainerLarge}>
+                          <Text style={styles.inputLabel}>名前</Text>
+                          <View style={styles.inputRow}>
+                            <TextInput
+                              style={styles.halfInput}
+                              placeholder="姓"
+                              value={formData.lastName}
+                              returnKeyType="done"
+                              onSubmitEditing={() => Keyboard.dismiss()}
+                              onChangeText={(v) => updateForm("lastName", v)}
+                            />
+                            <TextInput
+                              style={styles.halfInput}
+                              placeholder="名"
+                              value={formData.firstName}
+                              returnKeyType="done"
+                              onSubmitEditing={() => Keyboard.dismiss()}
+                              onChangeText={(v) => updateForm("firstName", v)}
+                            />
+                          </View>
                         </View>
-                      </View>
-                      <View style={styles.inputContainerLarge}><Text style={styles.inputLabel}>フリガナ</Text>
-                        <View style={styles.inputRow}>
-                          <TextInput style={styles.halfInput} placeholder="セイ" value={formData.lastNameKana} onChangeText={(v) => updateForm('lastNameKana', v)} />
-                          <TextInput style={styles.halfInput} placeholder="メイ" value={formData.firstNameKana} onChangeText={(v) => updateForm('firstNameKana', v)} />
+                        <View style={styles.inputContainerLarge}>
+                          <Text style={styles.inputLabel}>フリガナ</Text>
+                          <View style={styles.inputRow}>
+                            <TextInput
+                              style={styles.halfInput}
+                              placeholder="セイ"
+                              value={formData.lastNameKana}
+                              returnKeyType="done"
+                              onSubmitEditing={() => Keyboard.dismiss()}
+                              onChangeText={(v) =>
+                                updateForm("lastNameKana", v)
+                              }
+                            />
+                            <TextInput
+                              style={styles.halfInput}
+                              placeholder="メイ"
+                              value={formData.firstNameKana}
+                              returnKeyType="done"
+                              onSubmitEditing={() => Keyboard.dismiss()}
+                              onChangeText={(v) =>
+                                updateForm("firstNameKana", v)
+                              }
+                            />
+                          </View>
                         </View>
-                      </View>
-                    </>
-                  )}
-                  {step === 2 && (
-                    <>
-                      <View style={styles.inputContainer}><Text style={styles.inputLabel}>生年月日</Text>
-                        <View style={styles.inputRow}>
-                          <TextInput style={styles.dateInput} placeholder="年" keyboardType="number-pad" value={formData.birthYear} onChangeText={(v) => updateForm('birthYear', v)} />
-                          <TextInput style={styles.dateInput} placeholder="月" keyboardType="number-pad" value={formData.birthMonth} onChangeText={(v) => updateForm('birthMonth', v)} />
-                          <TextInput style={styles.dateInput} placeholder="日" keyboardType="number-pad" value={formData.birthDay} onChangeText={(v) => updateForm('birthDay', v)} />
+                      </>
+                    )}
+                    {step === 2 && (
+                      <>
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.inputLabel}>生年月日</Text>
+                          <View style={styles.inputRow}>
+                            <TextInput
+                              style={styles.dateInput}
+                              placeholder="年"
+                              keyboardType="number-pad"
+                              value={formData.birthYear}
+                              onChangeText={(v) => updateForm("birthYear", v)}
+                            />
+                            <TextInput
+                              style={styles.dateInput}
+                              placeholder="月"
+                              keyboardType="number-pad"
+                              value={formData.birthMonth}
+                              onChangeText={(v) => updateForm("birthMonth", v)}
+                            />
+                            <TextInput
+                              style={styles.dateInput}
+                              placeholder="日"
+                              keyboardType="number-pad"
+                              value={formData.birthDay}
+                              onChangeText={(v) => updateForm("birthDay", v)}
+                            />
+                          </View>
                         </View>
-                      </View>
-                      <View style={styles.inputContainer}><Text style={styles.inputLabel}>性別</Text>
-                        <View style={styles.inputRow}>
-                          {['男', '女', 'ひみつ'].map((label) => (
-                            <GenderButton key={label} label={label} isSelected={formData.gender === label} onPress={() => updateForm('gender', label)} />
-                          ))}
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.inputLabel}>性別</Text>
+                          <View style={styles.inputRow}>
+                            {["男", "女", "ひみつ"].map((label) => (
+                              <GenderButton
+                                key={label}
+                                label={label}
+                                isSelected={formData.gender === label}
+                                onPress={() => updateForm("gender", label)}
+                              />
+                            ))}
+                          </View>
                         </View>
-                      </View>
-                      <View style={styles.inputContainer}><Text style={styles.inputLabel}>出身地</Text>
-                        <TouchableOpacity style={styles.selectInput} onPress={() => setShowLocationPicker(true)}>
-                          <Text style={[styles.selectText, !formData.location && styles.selectTextPlaceholder]}>{formData.location || '選択してください'}</Text>
-                          <Ionicons name="chevron-down" size={20} color="#666" />
-                        </TouchableOpacity>
-                      </View>
-                    </>
-                  )}
+                        <View style={styles.inputContainer}>
+                          <Text style={styles.inputLabel}>出身地</Text>
+                          <TouchableOpacity
+                            style={styles.selectInput}
+                            onPress={() => setShowLocationPicker(true)}
+                          >
+                            <Text
+                              style={[
+                                styles.selectText,
+                                !formData.location &&
+                                  styles.selectTextPlaceholder,
+                              ]}
+                            >
+                              {formData.location || "選択してください"}
+                            </Text>
+                            <Ionicons
+                              name="chevron-down"
+                              size={20}
+                              color="#666"
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
                   </>
                 )}
-                
-                { step === 3 && (
+
+                {step === 3 && (
                   <View style={styles.cardContainer}>
-                    <Text style={styles.confirmTitle}>この内容で間違いありませんか？</Text>
-                    
+                    <Text style={styles.confirmTitle}>
+                      この内容で間違いありませんか？
+                    </Text>
+
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>名前</Text>
                       <View style={styles.confirmValueWrapper}>
-                        <Text style={styles.confirmValue}>{formData.lastName} {formData.firstName}</Text>
-                        {getConfirmValidation().missingName && <Text style={styles.errorText}>未入力</Text>}
+                        <Text style={styles.confirmValue}>
+                          {formData.lastName} {formData.firstName}
+                        </Text>
+                        {getConfirmValidation().missingName && (
+                          <Text style={styles.errorText}>未入力</Text>
+                        )}
                       </View>
                     </View>
-                    
+
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>フリガナ</Text>
                       <View style={styles.confirmValueWrapper}>
-                        <Text style={styles.confirmValue}>{formData.lastNameKana} {formData.firstNameKana}</Text>
-                        {getConfirmValidation().missingKana && <Text style={styles.errorText}>未入力</Text>}
+                        <Text style={styles.confirmValue}>
+                          {formData.lastNameKana} {formData.firstNameKana}
+                        </Text>
+                        {getConfirmValidation().missingKana && (
+                          <Text style={styles.errorText}>未入力</Text>
+                        )}
                       </View>
                     </View>
-                    
+
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>メールアドレス</Text>
-                      <Text style={styles.confirmValue}>test@example.com(テスト用)</Text>
+                      <Text style={styles.confirmValue}>
+                        test@example.com(テスト用)
+                      </Text>
                     </View>
 
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>生年月日</Text>
                       <View style={styles.confirmValueWrapper}>
-                        {!getConfirmValidation().missingBirthday && 
-                          <Text style={styles.confirmValue}>{formData.birthYear}年{formData.birthMonth}月{formData.birthDay}日</Text>
-                        }
-                        {getConfirmValidation().missingBirthday && <Text style={styles.errorText}>未入力</Text>}
+                        {!getConfirmValidation().missingBirthday && (
+                          <Text style={styles.confirmValue}>
+                            {formData.birthYear}年{formData.birthMonth}月
+                            {formData.birthDay}日
+                          </Text>
+                        )}
+                        {getConfirmValidation().missingBirthday && (
+                          <Text style={styles.errorText}>未入力</Text>
+                        )}
                       </View>
                     </View>
 
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>性別</Text>
                       <View style={styles.confirmValueWrapper}>
-                        <Text style={styles.confirmValue}>{formData.gender}</Text>
-                        {getConfirmValidation().missingGender && <Text style={styles.errorText}>未入力</Text>}
+                        <Text style={styles.confirmValue}>
+                          {formData.gender}
+                        </Text>
+                        {getConfirmValidation().missingGender && (
+                          <Text style={styles.errorText}>未入力</Text>
+                        )}
                       </View>
                     </View>
 
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>出身地</Text>
                       <View style={styles.confirmValueWrapper}>
-                        <Text style={styles.confirmValue}>{formData.location}</Text>
-                        {getConfirmValidation().missingLocation && <Text style={styles.errorText}>未入力</Text>}
+                        <Text style={styles.confirmValue}>
+                          {formData.location}
+                        </Text>
+                        {getConfirmValidation().missingLocation && (
+                          <Text style={styles.errorText}>未入力</Text>
+                        )}
                       </View>
                     </View>
 
@@ -234,9 +281,12 @@ export default function RegisterScreen() {
                       onNext={handleNext}
                       nextLabel="確定"
                     />
-                    {confirmErrorMessage ? <Text style={styles.submitErrorText}>{confirmErrorMessage}</Text> : null}
+                    {confirmErrorMessage ? (
+                      <Text style={styles.submitErrorText}>
+                        {confirmErrorMessage}
+                      </Text>
+                    ) : null}
                   </View>
-
                 )}
               </View>
 
@@ -253,18 +303,19 @@ export default function RegisterScreen() {
                   />
                 )}
               </View>
-              
             </View>
           </ScrollView>
         </SafeAreaView>
 
-        <LocationModal 
-          visible={showLocationPicker} 
-          onClose={() => setShowLocationPicker(false)} 
-          onSelect={(item) => { updateForm('location', item); setShowLocationPicker(false); }} 
+        <LocationModal
+          visible={showLocationPicker}
+          onClose={() => setShowLocationPicker(false)}
+          onSelect={(item) => {
+            updateForm("location", item);
+            setShowLocationPicker(false);
+          }}
         />
       </ImageBackground>
     </TouchableWithoutFeedback>
-    
   );
 }

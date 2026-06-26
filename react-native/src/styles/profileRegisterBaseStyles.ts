@@ -14,8 +14,8 @@ export const registerStyles = StyleSheet.create({
   
   titleContainer: { marginTop: 40, marginBottom: 40, alignItems: 'center' },
   headerImage: {
-    width: 200,    // 実際の画像の幅に合わせて調整してください
-    height: 50,    // 実際の画像の高さに合わせて調整してください
+    width: 200,
+    height: 50,
   },
   
   stepContent: { width: '100%' },
@@ -30,10 +30,6 @@ export const registerStyles = StyleSheet.create({
   halfInput: { flex: 1, height: 48, borderWidth: 4.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 12, fontSize: 16 },
   dateInput: { flex: 1, height: 48, borderWidth: 4.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', paddingHorizontal: 8, fontSize: 16, textAlign: 'center' },
   
-//   genderButton: { flex: 1, height: 48, borderWidth: 1.5, borderColor: '#443322', borderRadius: 12, backgroundColor: '#FFFFFF', justifyContent: 'center', alignItems: 'center' },
-//   genderButtonSelected: { backgroundColor: '#332211', borderColor: '#332211' },
-//   genderButtonText: { fontSize: 14, fontWeight: 'bold', color: '#443322' },
-//   genderButtonTextSelected: { color: '#FFE352' },
   genderButton: {
     flex: 1,
     height: 48,
@@ -146,4 +142,38 @@ export const registerStyles = StyleSheet.create({
     fontWeight: 'bold',
     textAlign: 'center',
   },
+});
+
+export const prefecturesModalStyles = StyleSheet.create({
+  // 🔍 検索窓全体の配置コンテナ
+  searchContainer: {
+    paddingHorizontal: 16,
+    marginBottom: 12,
+  },
+
+  // 👈 画面の太枠・角丸を再現した入力枠
+  input: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 3,     // 画面の太い黒枠に合わせる
+    borderColor: '#000',
+    borderRadius: 12,
+    backgroundColor: '#FFF',
+    paddingHorizontal: 10,
+    height: 48,
+  },
+
+  // テキストインプットの文字入力エリア
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    color: '#000',
+  },
+
+  // 都道府県リストの各行の調整
+  prefOptionCustom: {
+    borderBottomWidth: 1,
+    borderBottomColor: '#E0E0E0',
+    paddingVertical: 14,
+  }
 });

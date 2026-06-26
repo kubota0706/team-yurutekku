@@ -1,5 +1,7 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableOpacity } from 'react-native';
+
+import { actionButtonStyles } from '@/styles/actionButtonStyle';
 
 type ActionButtonsProps = {
   onNext: () => void;
@@ -9,7 +11,7 @@ type ActionButtonsProps = {
   showBack?: boolean;
 };
 
-const ActionButtons = ({
+export const ActionButtons = ({
   onNext,
   nextLabel,
   onBack,
@@ -17,59 +19,18 @@ const ActionButtons = ({
   showBack = false,
 }: ActionButtonsProps) => {
   return (
-    <View style={styles.buttonRow}>
+    <View style={actionButtonStyles.buttonRow}>
       {showBack ? (
-        <TouchableOpacity style={styles.backButton} onPress={onBack}>
-          <Text style={styles.backButtonText}>{backLabel}</Text>
+        <TouchableOpacity style={actionButtonStyles.backButton} onPress={onBack}>
+          <Text style={actionButtonStyles.backButtonText}>{backLabel}</Text>
         </TouchableOpacity>
       ) : (
-        <View style={styles.placeholder} />
+        <View style={actionButtonStyles.placeholder} />
       )}
-      <TouchableOpacity style={styles.nextButton} onPress={onNext}>
-        <Text style={styles.nextButtonText}>{nextLabel}</Text>
+      <TouchableOpacity style={actionButtonStyles.nextButton} onPress={onNext}>
+        <Text style={actionButtonStyles.nextButtonText}>{nextLabel}</Text>
       </TouchableOpacity>
     </View>
   );
 };
 
-const styles = StyleSheet.create({
-  buttonRow: {
-    flexDirection: 'row',
-    gap: 16,
-    width: '100%',
-  },
-  placeholder: {
-    flex: 1,
-  },
-  backButton: {
-    flex: 1,
-    height: 52,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#4293FF',
-    borderRadius: 26,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  backButtonText: {
-    color: '#4293FF',
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  nextButton: {
-    flex: 1,
-    height: 52,
-    backgroundColor: '#4293FF',
-    borderRadius: 26,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-  },
-});
-
-export default ActionButtons;
