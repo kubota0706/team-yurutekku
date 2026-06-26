@@ -6,6 +6,7 @@ import { useAtom } from 'jotai';
 import { registerStyles as styles } from '@/styles/profileRegisterBaseStyles';
 import { profileDocAtom, ProfileDoc } from '@/atoms/profileDocAtom';
 import { registerProfileBase } from '@/dao/firebaseRegister';
+import ActionButtons from '@/components/ActionButtons';
 
 const PREFECTURES = ['北海道', '青森県', '岩手県', '宮城県', '福島県', '東京都', '神奈川県', '大阪府'];
 
@@ -101,7 +102,8 @@ export default function RegisterScreen() {
           alert('登録完了');
         } catch (error) {
           console.error('登録に失敗しました:', error);
-          alert('登録中にエラーが発生しました');
+          // alert('登録中にエラーが発生しました');
+          setConfirmErrorMessage('登録中に予期せぬエラーが発生しました');
         }
       }
     };
@@ -224,10 +226,13 @@ export default function RegisterScreen() {
                       </View>
                     </View>
 
-                    <View style={styles.buttonRow}>
-                      <TouchableOpacity style={styles.backButton} onPress={handleBack}><Text style={styles.backButtonText}>戻る</Text></TouchableOpacity>
-                      <TouchableOpacity style={styles.nextButton} onPress={handleNext}><Text style={styles.nextButtonText}>確定</Text></TouchableOpacity>
-                    </View>
+                    <ActionButtons
+                      showBack
+                      onBack={handleBack}
+                      backLabel="戻る"
+                      onNext={handleNext}
+                      nextLabel="確定"
+                    />
                     {confirmErrorMessage ? <Text style={styles.submitErrorText}>{confirmErrorMessage}</Text> : null}
                   </View>
 
@@ -237,14 +242,15 @@ export default function RegisterScreen() {
               <View style={{ flex: 1 }} />
 
               <View style={styles.buttonArea}>
-                <View style={styles.buttonRow}>
-                  {step == 2 ? (
-                    <TouchableOpacity style={styles.backButton} onPress={handleBack}><Text style={styles.backButtonText}>戻る</Text></TouchableOpacity>
-                  ) : <View style={{ flex: 1 }} />}
-                  { step !== 3 && (
-                    <TouchableOpacity style={styles.nextButton} onPress={handleNext}><Text style={styles.nextButtonText}>次へ</Text></TouchableOpacity>
-                  )}
-                </View>
+                {step !== 3 && (
+                  <ActionButtons
+                    showBack={step === 2}
+                    onBack={handleBack}
+                    backLabel="戻る"
+                    onNext={handleNext}
+                    nextLabel="次へ"
+                  />
+                )}
               </View>
               
             </View>

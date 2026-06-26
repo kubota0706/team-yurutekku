@@ -60,11 +60,6 @@ export const registerStyles = StyleSheet.create({
   selectTextPlaceholder: { color: '#A0A0A0' },
   
   buttonArea: { width: '100%', paddingBottom: 20 },
-  buttonRow: { flexDirection: 'row', gap: 16, width: '100%' },
-  backButton: { flex: 1, height: 52, backgroundColor: '#FFFFFF', borderWidth: 2, borderColor: '#4293FF', borderRadius: 26, justifyContent: 'center', alignItems: 'center' },
-  backButtonText: { color: '#4293FF', fontSize: 16, fontWeight: 'bold' },
-  nextButton: { flex: 1, height: 52, backgroundColor: '#4293FF', borderRadius: 26, justifyContent: 'center', alignItems: 'center' },
-  nextButtonText: { color: '#FFFFFF', fontSize: 16, fontWeight: 'bold', letterSpacing: 2 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
