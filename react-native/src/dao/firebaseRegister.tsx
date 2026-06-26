@@ -26,11 +26,42 @@ export const registerProfileBase = async (profileData: ProfileDoc): Promise<void
   try {
     await setDoc(profileDocRef, profileDocument);
     console.log(`[DAO] profile ドキュメント登録成功 (${profileData.uid}-1)`);
+
+    if(profileData.iconImagePath) {
+      setUserMetaVersion(profileData.uid, 1)
+  }
   } catch (error) {
     console.error('[DAO] profile ドキュメント登録に失敗しました:', error);
     throw error;
   }
 }
+
+/**
+ * user-meta コレクションに最新バージョンを保存します。
+ * uid をキーに version と updatedAt を merge: true で書き込みます。
+ * @param uid - 取得対象ユーザーのUID
+ * @param version - 最新バージョン番号
+ */
+export const setUserMetaVersion = async (uid: string, version: number): Promise<void> => {
+  if (!uid) {
+    throw new Error('uid が設定されていません。user-meta のドキュメントキーを指定してください。');
+  }
+
+  const userMetaDocRef = doc(db, 'user-meta', uid);
+  const userMetaDocument = {
+    version,
+    updatedAt: serverTimestamp(),
+  };
+
+  try {
+    await setDoc(userMetaDocRef, userMetaDocument, { merge: true });
+    console.log(`[DAO] user-meta ドキュメント更新成功 (${uid})`, userMetaDocument);
+  } catch (error) {
+    console.error('[DAO] user-meta ドキュメント更新に失敗しました:', error);
+    throw error;
+  }
+}
+
 /**
  * 端末内の画像ファイルをFirebase Storageにアップロードし、公開URLを取得する関数
  * @param localUri ImagePicker等で取得した端末内のローカルパス (file://...)
