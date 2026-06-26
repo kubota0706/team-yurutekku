@@ -133,4 +133,22 @@ export const registerStyles = StyleSheet.create({
     fontWeight: '600',
     flex: 1.5, // 値側を少し広く取る
   },
+  confirmValueWrapper: {
+    flex: 1.5,
+    alignItems: 'flex-end',
+  },
+  errorText: {
+    marginTop: 4,
+    color: '#D60000',
+    fontSize: 12,
+    fontWeight: 'bold',
+    textAlign: 'right',
+  },
+  submitErrorText: {
+    marginTop: 16,
+    color: '#D60000',
+    fontSize: 14,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
 });

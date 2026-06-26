@@ -54,6 +54,7 @@ export default function RegisterScreen() {
     lastName: '', firstName: '', lastNameKana: '', firstNameKana: '',
     birthYear: '', birthMonth: '', birthDay: '', gender: null as string | null, location: '',
   });
+  const [confirmErrorMessage, setConfirmErrorMessage] = useState('');
 
   const updateForm = (key: keyof typeof formData, value: any) => setFormData({ ...formData, [key]: value });
 
@@ -61,18 +62,35 @@ export default function RegisterScreen() {
     setProfileDoc((prev) => ({ ...prev, ...data }));
   };
 
+  const getConfirmValidation = () => {
+    const missingName = !formData.lastName.trim() || !formData.firstName.trim();
+    const missingKana = !formData.lastNameKana.trim() || !formData.firstNameKana.trim();
+    const missingBirthday = !formData.birthYear.trim() || !formData.birthMonth.trim() || !formData.birthDay.trim();
+    const missingGender = !formData.gender;
+    const missingLocation = !formData.location.trim();
+    const hasMissing = missingName || missingKana || missingBirthday || missingGender || missingLocation;
+
+    return { missingName, missingKana, missingBirthday, missingGender, missingLocation, hasMissing };
+  };
+
   const handleNext = async () => {
       if (step < 3) {
+        setConfirmErrorMessage('');
         setStep(step + 1);
       } else {
+        const validation = getConfirmValidation();
+        if (validation.hasMissing) {
+          setConfirmErrorMessage('未入力の項目があります');
+          return;
+        }
+
+        setConfirmErrorMessage('');
         const combinedProfile: ProfileDoc = {
           ...profileDoc,
           uid: 'test3',
           userName: `${formData.lastName} ${formData.firstName}`.trim() || null,
           gender: formData.gender === '男' ? 'male' : formData.gender === '女' ? 'female' : null,
-          birthday: formData.birthYear && formData.birthMonth && formData.birthDay
-            ? new Date(Number(formData.birthYear), Number(formData.birthMonth) - 1, Number(formData.birthDay))
-            : null,
+          birthday: new Date(Number(formData.birthYear), Number(formData.birthMonth) - 1, Number(formData.birthDay)),
           connectAdd: formData.location || null,
           updatedAt: new Date(),
         };
@@ -161,12 +179,18 @@ export default function RegisterScreen() {
                     
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>名前</Text>
-                      <Text style={styles.confirmValue}>{formData.lastName} {formData.firstName}</Text>
+                      <View style={styles.confirmValueWrapper}>
+                        <Text style={styles.confirmValue}>{formData.lastName} {formData.firstName}</Text>
+                        {getConfirmValidation().missingName && <Text style={styles.errorText}>未入力</Text>}
+                      </View>
                     </View>
                     
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>フリガナ</Text>
-                      <Text style={styles.confirmValue}>{formData.lastNameKana} {formData.firstNameKana}</Text>
+                      <View style={styles.confirmValueWrapper}>
+                        <Text style={styles.confirmValue}>{formData.lastNameKana} {formData.firstNameKana}</Text>
+                        {getConfirmValidation().missingKana && <Text style={styles.errorText}>未入力</Text>}
+                      </View>
                     </View>
                     
                     <View style={styles.confirmRow}>
@@ -176,25 +200,35 @@ export default function RegisterScreen() {
 
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>生年月日</Text>
-                      <Text style={styles.confirmValue}>{formData.birthYear}年{formData.birthMonth}月{formData.birthDay}日</Text>
+                      <View style={styles.confirmValueWrapper}>
+                        {!getConfirmValidation().missingBirthday && 
+                          <Text style={styles.confirmValue}>{formData.birthYear}年{formData.birthMonth}月{formData.birthDay}日</Text>
+                        }
+                        {getConfirmValidation().missingBirthday && <Text style={styles.errorText}>未入力</Text>}
+                      </View>
                     </View>
 
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>性別</Text>
-                      <Text style={styles.confirmValue}>{formData.gender}</Text>
+                      <View style={styles.confirmValueWrapper}>
+                        <Text style={styles.confirmValue}>{formData.gender}</Text>
+                        {getConfirmValidation().missingGender && <Text style={styles.errorText}>未入力</Text>}
+                      </View>
                     </View>
 
                     <View style={styles.confirmRow}>
                       <Text style={styles.confirmLabel}>出身地</Text>
-                      <Text style={styles.confirmValue}>{formData.location}</Text>
+                      <View style={styles.confirmValueWrapper}>
+                        <Text style={styles.confirmValue}>{formData.location}</Text>
+                        {getConfirmValidation().missingLocation && <Text style={styles.errorText}>未入力</Text>}
+                      </View>
                     </View>
 
-	                <View style={styles.buttonRow}>
-
-						<TouchableOpacity style={styles.backButton} onPress={handleBack}><Text style={styles.backButtonText}>戻る</Text></TouchableOpacity>
-						<TouchableOpacity style={styles.nextButton} onPress={handleNext}><Text style={styles.nextButtonText}>確定</Text></TouchableOpacity>
-					</View>
-
+                    <View style={styles.buttonRow}>
+                      <TouchableOpacity style={styles.backButton} onPress={handleBack}><Text style={styles.backButtonText}>戻る</Text></TouchableOpacity>
+                      <TouchableOpacity style={styles.nextButton} onPress={handleNext}><Text style={styles.nextButtonText}>確定</Text></TouchableOpacity>
+                    </View>
+                    {confirmErrorMessage ? <Text style={styles.submitErrorText}>{confirmErrorMessage}</Text> : null}
                   </View>
 
                 )}
