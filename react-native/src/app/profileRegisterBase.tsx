@@ -18,7 +18,6 @@ import { Ionicons } from "@expo/vector-icons";
 import { registerStyles as styles } from "@/styles/profileRegisterBaseStyles";
 import { ActionButtons } from "@/components/ActionButtons";
 import { useProfileForm } from "@/hooks/useProfileRegisterBaseForm";
-import { PREFECTURES } from "@/constants/prefectures";
 import LocationModal from "@/components/prefecturesModal";
 
 // --- 画面専用の部品コンポーネント ---
