@@ -1,6 +1,6 @@
 import { db } from './firebaseConfig';
 import { doc, getDoc, DocumentData } from 'firebase/firestore';
-import { ProfileDoc } from '@/atoms/profileDocAtom';
+import { ProfileDoc } from '@/types/firebaseDoc';
 
 /**
  * Firestoreから指定されたバージョンのユーザープロフィール情報を取得する。
