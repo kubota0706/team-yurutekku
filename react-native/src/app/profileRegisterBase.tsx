@@ -4,7 +4,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useAtom } from 'jotai';
 import { registerStyles as styles } from '@/styles/profileRegisterBaseStyles';
-import { profileDocAtom, ProfileDoc } from '@/atoms/profileDocAtom';
+import { profileDocAtom } from '@/atoms/profileDocAtom';
+import { ProfileDoc } from '@/types/firebaseDoc';
 import { registerProfileBase } from '@/dao/firebaseRegister';
 import ActionButtons from '@/components/ActionButtons';
 

@@ -2,7 +2,7 @@
 import { db } from './firebaseConfig'; 
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { ProfileDoc } from '@/atoms/profileDocAtom';
+import { ProfileDoc } from '@/types/firebaseDoc';
 
 export const registerProfileBase = async (profileData: ProfileDoc): Promise<void> => {
   if (!profileData.uid) {
