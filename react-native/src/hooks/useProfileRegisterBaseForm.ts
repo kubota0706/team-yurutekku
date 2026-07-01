@@ -8,7 +8,6 @@ import { useRouter } from 'expo-router';
 export const useProfileForm = () => {
   const router = useRouter();
   const [step, setStep] = useState(1);
-  const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [profileDoc, setProfileDoc] = useAtom(profileDocAtom);
   const [confirmErrorMessage, setConfirmErrorMessage] = useState('');
 
@@ -72,8 +71,6 @@ export const useProfileForm = () => {
   return {
     step,
     formData,
-    showLocationPicker,
-    setShowLocationPicker,
     confirmErrorMessage,
     updateForm,
     getConfirmValidation,

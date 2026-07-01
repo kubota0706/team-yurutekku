@@ -15,7 +15,6 @@ import { Image } from "expo-image";
 import { registerStyles as styles } from "@/styles/profileRegisterBaseStyles";
 import { ActionButtons } from "@/components/ActionButtons";
 import { useProfileForm } from "@/hooks/useProfileRegisterBaseForm";
-import LocationModal from "@/components/prefecturesModal";
 import GenericSelectionModal from "@/components/GenericSelectionModal";
 import { PREFECTURES } from "@/constants/prefectures";
 import { SelectionTrigger } from "@/components/SelectionTrigger";
@@ -93,8 +92,6 @@ export default function RegisterScreen() {
   const {
     step,
     formData,
-    showLocationPicker,
-    setShowLocationPicker,
     confirmErrorMessage,
     updateForm,
     getConfirmValidation,
@@ -371,15 +368,6 @@ export default function RegisterScreen() {
             </View>
           </ScrollView>
         </SafeAreaView>
-
-        <LocationModal
-          visible={showLocationPicker}
-          onClose={() => setShowLocationPicker(false)}
-          onSelect={(item) => {
-            updateForm("location", item);
-            setShowLocationPicker(false);
-          }}
-        />
       </ImageBackground>
     </TouchableWithoutFeedback>
   );
