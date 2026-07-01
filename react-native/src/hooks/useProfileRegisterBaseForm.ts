@@ -3,8 +3,10 @@ import { useAtom } from 'jotai';
 import { profileDocAtom } from '@/atoms/profileDocAtom';
 import { ProfileDoc } from '@/types/firebaseDoc';
 import { registerProfileBase } from '@/dao/firebaseRegister';
+import { useRouter } from 'expo-router';
 
 export const useProfileForm = () => {
+  const router = useRouter();
   const [step, setStep] = useState(1);
   const [showLocationPicker, setShowLocationPicker] = useState(false);
   const [profileDoc, setProfileDoc] = useAtom(profileDocAtom);
@@ -54,7 +56,8 @@ export const useProfileForm = () => {
       try {
         setProfileDoc(combinedProfile);
         await registerProfileBase(combinedProfile);
-        alert('登録完了');
+        // alert('登録完了');
+        router.replace('/appDescription')
       } catch (error) {
         console.error('登録に失敗しました:', error);
         setConfirmErrorMessage('登録中に予期せぬエラーが発生しました');
