@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, StyleProp, ViewStyle } from 'react-native';
 
 import { actionButtonStyles } from '@/styles/actionButtonStyle';
 
@@ -9,6 +9,8 @@ type ActionButtonsProps = {
   onBack?: () => void;
   backLabel?: string;
   showBack?: boolean;
+  centered?: boolean;
+  setStyle?: StyleProp<ViewStyle>;
 };
 
 export const ActionButtons = ({
@@ -17,9 +19,24 @@ export const ActionButtons = ({
   onBack,
   backLabel = '戻る',
   showBack = false,
+  centered = false,
+  setStyle,
 }: ActionButtonsProps) => {
+  if (centered && !showBack) {
+    return (
+      <View style={[actionButtonStyles.centeredRow, setStyle || null]}>
+        <TouchableOpacity
+          style={[actionButtonStyles.nextButton, actionButtonStyles.nextButtonSingle]}
+          onPress={onNext}
+        >
+          <Text style={actionButtonStyles.nextButtonText}>{nextLabel}</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
   return (
-    <View style={actionButtonStyles.buttonRow}>
+    <View style={[actionButtonStyles.buttonRow, setStyle || null]}>
       {showBack ? (
         <TouchableOpacity style={actionButtonStyles.backButton} onPress={onBack}>
           <Text style={actionButtonStyles.backButtonText}>{backLabel}</Text>
@@ -33,4 +50,3 @@ export const ActionButtons = ({
     </View>
   );
 };
-

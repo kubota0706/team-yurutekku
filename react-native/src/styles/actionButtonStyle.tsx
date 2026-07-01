@@ -6,6 +6,19 @@ export const actionButtonStyles = StyleSheet.create({
     gap: 16,
     width: '100%',
   },
+  centeredRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    width: '100%',
+  },
+  buttonRowSingle: {
+    flexDirection: 'row',
+    width: '100%',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 24,
+  },
   placeholder: {
     flex: 1,
   },
@@ -31,6 +44,12 @@ export const actionButtonStyles = StyleSheet.create({
     borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  nextButtonSingle: {
+    flex: 0,
+    minWidth: 180,
+    paddingHorizontal: 20,
+    alignSelf: 'center',
   },
   nextButtonText: {
     color: '#FFFFFF',

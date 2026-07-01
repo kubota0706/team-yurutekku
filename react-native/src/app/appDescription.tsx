@@ -1,7 +1,9 @@
 import React, { useState } from 'react';
 import { View, Dimensions } from 'react-native';
+import { useRouter } from 'expo-router';
 import PagerView from 'react-native-pager-view';
 import { Image } from 'expo-image';
+import { ActionButtons } from '@/components/ActionButtons';
 import { descriptionStyles as styles } from '@/styles/appDescriptionStyle';
 
 const { width: defaultWidth, height: defaultHeight } = Dimensions.get('window');
@@ -22,6 +24,11 @@ export default function App({
     require('@/assets/アプリ説明2.png'),
     require('@/assets/アプリ説明3.png'),
   ];
+
+  const router = useRouter();
+  const handleStart = () => {
+    router.push('/');
+  };
 
  return (
     <View style={styles.container}>
@@ -46,6 +53,12 @@ export default function App({
           </View>
         ))}
       </PagerView>
+
+      {activePage === images.length - 1 && (
+        <View style={styles.startButtonWrapper}>
+          <ActionButtons onNext={handleStart} nextLabel="はじめる" centered />
+        </View>
+      )}
 
       <View style={styles.dotContainer}>
         {images.map((_, index) => (

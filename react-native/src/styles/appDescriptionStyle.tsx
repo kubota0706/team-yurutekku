@@ -2,6 +2,7 @@ import { StyleSheet} from 'react-native';
 
 export const descriptionStyles = StyleSheet.create({
   container: {
+    position: 'relative',
     flex: 1,
     backgroundColor: '#FFDD48', 
   },
@@ -26,7 +27,7 @@ export const descriptionStyles = StyleSheet.create({
   },
   dotContainer: {
     position: 'absolute',
-    bottom: 24,
+    top: 80,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -38,6 +39,13 @@ export const descriptionStyles = StyleSheet.create({
     height: 10,
     borderRadius: 5,
     marginHorizontal: 6,
+  },
+  startButtonWrapper: {
+    position: 'absolute',
+    top: 24,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
   },
   activeDot: {
     backgroundColor: '#333',
