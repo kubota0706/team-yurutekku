@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { StyleSheet, View, Dimensions, StatusBar } from 'react-native';
 import PagerView from 'react-native-pager-view';
 import { Image } from 'expo-image';
@@ -7,6 +7,7 @@ import { Image } from 'expo-image';
 const { width, height } = Dimensions.get('window');
 
 export default function App() {
+  const [activePage, setActivePage] = useState(0);
   // 表示したい画像のリスト（ローカル画像またはURL）
   const images = [
     require('@/assets/アプリの説明.png'),
@@ -21,6 +22,7 @@ export default function App() {
       <PagerView 
         style={styles.pagerView} 
         initialPage={0}
+        onPageScroll={(event) => setActivePage(Math.round(event.nativeEvent.position + event.nativeEvent.offset))}
         // ページ間の隙間を0にする（ScrollViewの場合は不要）
         pageMargin={0} 
       >
@@ -36,6 +38,18 @@ export default function App() {
           </View>
         ))}
       </PagerView>
+
+      <View style={styles.dotContainer}>
+        {images.map((_, index) => (
+          <View
+            key={index}
+            style={[
+              styles.dot,
+              index === activePage ? styles.activeDot : styles.inactiveDot,
+            ]}
+          />
+        ))}
+      </View>
     </View>
   );
 }
@@ -43,8 +57,6 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    // 隙間が見えるか確認するために、あえて目立つ色（赤など）にしても良い
-    // 最終的には黒でOK
     backgroundColor: '#FFDD48', 
   },
   pagerView: {
@@ -65,5 +77,27 @@ const styles = StyleSheet.create({
     // ★親（page）のサイズいっぱいにする
     width: '100%',
     height: '100%',
+  },
+  dotContainer: {
+    position: 'absolute',
+    bottom: 24,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    marginHorizontal: 6,
+  },
+  activeDot: {
+    backgroundColor: '#333',
+  },
+  inactiveDot: {
+    backgroundColor: '#fff',
+    opacity: 0.75,
   },
 });
