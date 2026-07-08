@@ -27,7 +27,7 @@ export const descriptionStyles = StyleSheet.create({
   },
   dotContainer: {
     position: 'absolute',
-    top: 80,
+    bottom: 32,
     left: 0,
     right: 0,
     flexDirection: 'row',
@@ -42,7 +42,7 @@ export const descriptionStyles = StyleSheet.create({
   },
   startButtonWrapper: {
     position: 'absolute',
-    top: 24,
+    bottom: 95,
     left: 0,
     right: 0,
     alignItems: 'center',

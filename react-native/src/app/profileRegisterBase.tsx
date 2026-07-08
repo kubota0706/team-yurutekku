@@ -150,7 +150,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="姓"
-                              value={formData.lastName}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.lastName ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) => updateForm("lastName", v)}
@@ -158,7 +159,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="名"
-                              value={formData.firstName}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.firstName ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) => updateForm("firstName", v)}
@@ -171,7 +173,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="セイ"
-                              value={formData.lastNameKana}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.lastNameKana ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) =>
@@ -181,7 +184,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="メイ"
-                              value={formData.firstNameKana}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.firstNameKana ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) =>
