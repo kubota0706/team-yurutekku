@@ -2,39 +2,65 @@
 import { db } from './firebaseConfig'; 
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { ProfileData } from '@/atoms/profileAtom';
+import { ProfileDoc } from '@/types/firebaseDoc';
 
-/**
- * ユーザープロフィール情報をFirestoreに登録するDAO関数
- * @param profileData Jotaiのフォームデータ
- */
-export const insertUserProfile = async (profileData: ProfileData): Promise<void> => {
-  // テスト用固定UID
-  const uid = 'test';
+export const registerProfileBase = async (profileData: ProfileDoc): Promise<void> => {
+  if (!profileData.uid) {
+    throw new Error('uid が設定されていません。Firestore ドキュメントキーを指定してください。');
+  }
 
-  // 物理名とデータ型の設計に100%合わせたオブジェクト構造
-  const userDocument = {
-    userName: profileData.userName,                     // ユーザー名 (必須)
-    birthday: profileData.birthday,                     // 生年月日 (必須)
-    iconImagePath: profileData.iconImagePath,           // アイコン画像パス (必須)
-    bio: profileData.bio,                               // 自己紹介文 (必須)
-    gender: profileData.gender,                         // 性別 (必須)
-    connectAdd: profileData.connectAdd,
-    version: 1,                                         // バージョン (一旦1固定)
-    createdAt: serverTimestamp(),                       // サーバー側で刻む正確な作成日時
-    updatedAt: serverTimestamp(),                       // サーバー側で刻む正確な更新日時
+  const profileDocRef = doc(db, 'profile', `${profileData.uid}-1`);
+  const profileDocument = {
+    uid: profileData.uid,
+    userName: profileData.userName ?? '',
+    gender: profileData.gender ?? null,
+    birthday: profileData.birthday instanceof Date ? profileData.birthday : null,
+    iconImagePath: profileData.iconImagePath ?? null,
+    bio: profileData.bio ?? null,
+    connectAdd: profileData.connectAdd ?? null,
+    version: 1,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
   };
 
   try {
-    // usersコレクションの 'test' ドキュメントに対してデータを書き込み（既存があればマージ）
-    const userDocRef = doc(db, 'users', uid);
-    await setDoc(userDocRef, userDocument, { merge: true });
-    console.log(`[DAO] Firestoreへの登録成功 (uid: ${uid})`);
+    await setDoc(profileDocRef, profileDocument);
+    console.log(`[DAO] profile ドキュメント登録成功 (${profileData.uid}-1)`);
+
+    if(profileData.iconImagePath) {
+      setUserMetaVersion(profileData.uid, 1)
+  }
   } catch (error) {
-    console.error('[DAO] Firestoreへの書き込みに失敗しました:', error);
+    console.error('[DAO] profile ドキュメント登録に失敗しました:', error);
     throw error;
   }
-};
+}
+
+/**
+ * user-meta コレクションに最新バージョンを保存します。
+ * uid をキーに version と updatedAt を merge: true で書き込みます。
+ * @param uid - 取得対象ユーザーのUID
+ * @param version - 最新バージョン番号
+ */
+export const setUserMetaVersion = async (uid: string, version: number): Promise<void> => {
+  if (!uid) {
+    throw new Error('uid が設定されていません。user-meta のドキュメントキーを指定してください。');
+  }
+
+  const userMetaDocRef = doc(db, 'user-meta', uid);
+  const userMetaDocument = {
+    version,
+    updatedAt: serverTimestamp(),
+  };
+
+  try {
+    await setDoc(userMetaDocRef, userMetaDocument, { merge: true });
+    console.log(`[DAO] user-meta ドキュメント更新成功 (${uid})`, userMetaDocument);
+  } catch (error) {
+    console.error('[DAO] user-meta ドキュメント更新に失敗しました:', error);
+    throw error;
+  }
+}
 
 /**
  * 端末内の画像ファイルをFirebase Storageにアップロードし、公開URLを取得する関数
