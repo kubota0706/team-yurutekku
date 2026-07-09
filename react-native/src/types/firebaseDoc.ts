@@ -10,3 +10,12 @@ export type ProfileDoc = {
   updatedAt: Date | null;
   version: number;
 };
+
+export type preferences = {
+  uid: string;
+  movie: string | null;
+  likedFood: string | null;
+  hobby1: string | null;
+  hobby2: string | null;
+  skill: string | null;
+};
