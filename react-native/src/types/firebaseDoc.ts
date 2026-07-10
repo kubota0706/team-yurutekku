@@ -15,7 +15,6 @@ export type preferences = {
   uid: string;
   movie: string | null;
   likedFood: string | null;
-  hobby1: string | null;
-  hobby2: string | null;
+  hobby: string | null;
   skill: string | null;
 };

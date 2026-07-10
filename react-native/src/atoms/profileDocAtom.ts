@@ -19,7 +19,6 @@ export const preferencesAtom = atom<preferences>({
     uid: '',
     movie: null,
     likedFood: null,
-    hobby1: null,
-    hobby2: null,
+    hobby: null,
     skill: null,
 })

@@ -27,7 +27,7 @@ export default function App({
 
   const router = useRouter();
   const handleStart = () => {
-    router.push('/');
+    router.push('/hobbyRegister');
   };
 
  return (
