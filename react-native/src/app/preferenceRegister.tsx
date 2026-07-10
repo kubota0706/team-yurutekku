@@ -4,9 +4,9 @@ import { View, TextInput, KeyboardAvoidingView, Platform, Text, TouchableWithout
 import { Image } from 'expo-image';
 import { ActionButtons } from '@/components/ActionButtons';
 import { usePreferenceRegister } from '@/hooks/usePreferenceRegister';
-import { hobbyRegisterStyles as styles } from '@/styles/hobbyRegisterStyles';
+import { preferenceRegisterStyles as styles } from '@/styles/preferenceRegisterStyles';
 
-export default function HobbyRegisterScreen() {
+export default function PreferenceRegisterScreen() {
   const {
     step,
     currentStep,
