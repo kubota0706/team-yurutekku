@@ -3,7 +3,7 @@ import { useAtom } from 'jotai';
 import { useRouter } from 'expo-router';
 import { preferencesAtom } from '@/atoms/profileDocAtom';
 import { preferences } from '@/types/firebaseDoc';
-import { saveUserPreferences } from '@/dao/profileRegister';
+import { saveUserPreferences } from '@/dao/preferenceRegister';
 
 export type PreferenceField = Exclude<keyof preferences, 'uid'>;
 
