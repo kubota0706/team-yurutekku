@@ -1,12 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { View, TextInput, KeyboardAvoidingView, Platform, Text, TouchableWithoutFeedback, Keyboard } from 'react-native';
 import { Image } from 'expo-image';
+import { useFonts, ZenMaruGothic_900Black } from '@expo-google-fonts/zen-maru-gothic';
 import { ActionButtons } from '@/components/ActionButtons';
 import { usePreferenceRegister } from '@/hooks/usePreferenceRegister';
 import { preferenceRegisterStyles as styles } from '@/styles/preferenceRegisterStyles';
 
 export default function PreferenceRegisterScreen() {
+  useFonts({
+    ZenMaruGothic_900Black,
+  });
+
   const {
     step,
     currentStep,
@@ -19,6 +24,8 @@ export default function PreferenceRegisterScreen() {
     totalSteps,
   } = usePreferenceRegister('test3', 1);
 
+  const [imageAspectRatio, setImageAspectRatio] = useState(3);
+
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
       <SafeAreaView style={styles.container}>
@@ -30,7 +37,15 @@ export default function PreferenceRegisterScreen() {
             <View style={styles.questionBlock}>
               <Text style={[styles.screenTitle, step !== 1 && styles.hiddenTitle]}>自分のプロフィールを{`\n`}作成しましょう！</Text>
               <View style={styles.questionImageWrapper}>
-                <Image source={currentStep.asset} style={styles.questionImage} contentFit="contain" />
+                <Image
+                  source={currentStep.asset}
+                  style={[styles.questionImage, { width: styles.questionImage.height * imageAspectRatio }]}
+                  contentFit="contain"
+                  onLoad={(e) => {
+                    const { width, height } = e.source;
+                    if (height > 0) setImageAspectRatio(width / height);
+                  }}
+                />
               </View>
               <View style={styles.answerCard}>
                 <TextInput
@@ -40,7 +55,6 @@ export default function PreferenceRegisterScreen() {
                   textAlign="center"
                   returnKeyType="done"
                   onSubmitEditing={Keyboard.dismiss}
-                  blurOnSubmit={true}
                 />
               </View>
               {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}

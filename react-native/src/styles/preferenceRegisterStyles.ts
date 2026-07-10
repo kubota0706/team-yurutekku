@@ -18,7 +18,7 @@ export const preferenceRegisterStyles = StyleSheet.create({
   questionBlock: {
     alignItems: 'center',
     justifyContent: 'flex-start',
-    gap: 18,
+    gap: 24,
     marginTop: 28,
     paddingBottom: 24,
   },
@@ -28,18 +28,17 @@ export const preferenceRegisterStyles = StyleSheet.create({
     alignItems: 'center',
   },
   questionImage: {
-    width: '100%',
-    height: 44,
+    height: 28,
   },
   answerCard: {
-    width: '100%',
+    width: '70%',
     maxWidth: 280,
     backgroundColor: '#FFFFFF',
     borderRadius: 16,
     borderWidth: 6,
     borderColor: '#443322',
     paddingHorizontal: 16,
-    paddingVertical: 14,
+    paddingVertical: 10,
     justifyContent: 'center',
   },
   screenTitle: {
@@ -54,7 +53,8 @@ export const preferenceRegisterStyles = StyleSheet.create({
   },
   textInput: {
     minHeight: 44,
-    fontSize: 20,
+    fontSize: 26,
+    fontFamily: 'ZenMaruGothic_900Black',
     fontWeight: '800',
     color: '#443322',
     textAlign: 'center',
