@@ -11,6 +11,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import {
+  useFonts,
+  ZenMaruGothic_500Medium,
+  ZenMaruGothic_900Black,
+} from '@expo-google-fonts/zen-maru-gothic';
 
 import { registerStyles as styles } from "@/styles/profileRegisterBaseStyles";
 import { ActionButtons } from "@/components/ActionButtons";
@@ -89,6 +94,11 @@ const GenderButton = ({
 // --- メイン画面コンポーネント ---
 
 export default function RegisterScreen() {
+  useFonts({
+    ZenMaruGothic_500Medium,
+    ZenMaruGothic_900Black,
+  });
+
   const {
     step,
     formData,
