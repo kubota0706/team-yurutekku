@@ -5,20 +5,67 @@ import {
   TextInput,
   TouchableOpacity,
   ImageBackground,
-  Modal,
-  FlatList,
   TouchableWithoutFeedback,
   Keyboard,
   ScrollView,
-  Image,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Ionicons } from "@expo/vector-icons";
+import { Image } from "expo-image";
 
 import { registerStyles as styles } from "@/styles/profileRegisterBaseStyles";
 import { ActionButtons } from "@/components/ActionButtons";
 import { useProfileForm } from "@/hooks/useProfileRegisterBaseForm";
-import LocationModal from "@/components/prefecturesModal";
+import GenericSelectionModal from "@/components/GenericSelectionModal";
+import { PREFECTURES } from "@/constants/prefectures";
+import { SelectionTrigger } from "@/components/SelectionTrigger";
+
+// 年月日選択モーダル用配列
+const currentYear = new Date().getFullYear(); // 実行時の現在の年（例: 2026）を取得
+const startYear = 1900;
+const totalYears = currentYear - startYear + 1;
+// 年配列
+const yearsData = Array.from({ length: totalYears }, (_, i) =>
+  String(currentYear - i),
+); // 現在の年から1900年までを降順で生成
+// 月配列
+const monthsData = Array.from({ length: 12 }, (_, i) => String(i + 1));
+// 日配列
+const daysData = Array.from({ length: 31 }, (_, i) => String(i + 1));
+
+const getModalConfig = (type: "year" | "month" | "day" | "location" | null) => {
+  switch (type) {
+    case "year":
+      return {
+        data: yearsData,
+        title: "年を選択",
+        placeholder: "年を検索",
+        keyboardType: "number-pad" as const,
+      };
+    case "month":
+      return {
+        data: monthsData,
+        title: "月を選択",
+        placeholder: "月を検索",
+        keyboardType: "number-pad" as const,
+      };
+    case "day":
+      return {
+        data: daysData,
+        title: "日を選択",
+        placeholder: "日付を検索",
+        keyboardType: "number-pad" as const,
+      };
+    case "location":
+      return {
+        data: PREFECTURES,
+        title: "出身地を選択",
+        placeholder: "都道府県を検索",
+        keyboardType: "default" as const,
+      };
+    default:
+      return null;
+  }
+};
 
 // --- 画面専用の部品コンポーネント ---
 
@@ -45,14 +92,28 @@ export default function RegisterScreen() {
   const {
     step,
     formData,
-    showLocationPicker,
-    setShowLocationPicker,
     confirmErrorMessage,
     updateForm,
     getConfirmValidation,
     handleNext,
     handleBack,
   } = useProfileForm();
+
+  const [activeModal, setActiveModal] = React.useState<
+    "year" | "month" | "day" | "location" | null
+  >(null);
+
+  // 現在のモードに応じた設定を取得
+  const currentModalConfig = getModalConfig(activeModal);
+
+  // 値が選択されたときの振り分けロジック
+  const handleSelect = (val: string) => {
+    if (activeModal === "year") updateForm("birthYear", val);
+    if (activeModal === "month") updateForm("birthMonth", val);
+    if (activeModal === "day") updateForm("birthDay", val);
+    if (activeModal === "location") updateForm("location", val);
+    setActiveModal(null);
+  };
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
@@ -72,7 +133,9 @@ export default function RegisterScreen() {
                 <Image
                   source={require("@/assets/register-text.png")}
                   style={styles.headerImage}
-                  resizeMode="contain"
+                  //   resizeMode="contain"
+                  contentFit="cover"
+                  transition={200}
                 />
               </View>
 
@@ -134,26 +197,26 @@ export default function RegisterScreen() {
                         <View style={styles.inputContainer}>
                           <Text style={styles.inputLabel}>生年月日</Text>
                           <View style={styles.inputRow}>
-                            <TextInput
-                              style={styles.dateInput}
+                            <SelectionTrigger
+                              value={formData.birthYear} // 現在フォームに入っている値（オブジェクトの構造に合わせて変更してください）
                               placeholder="年"
-                              keyboardType="number-pad"
-                              value={formData.birthYear}
-                              onChangeText={(v) => updateForm("birthYear", v)}
+                              onPress={() => setActiveModal("year")}
+                              containerStyle={styles.dateInput}
+                              other="年"
                             />
-                            <TextInput
-                              style={styles.dateInput}
+                            <SelectionTrigger
+                              value={formData.birthMonth} // 現在フォームに入っている値（オブジェクトの構造に合わせて変更してください）
                               placeholder="月"
-                              keyboardType="number-pad"
-                              value={formData.birthMonth}
-                              onChangeText={(v) => updateForm("birthMonth", v)}
+                              onPress={() => setActiveModal("month")}
+                              containerStyle={styles.dateInput}
+                              other="月"
                             />
-                            <TextInput
-                              style={styles.dateInput}
+                            <SelectionTrigger
+                              value={formData.birthDay} // 現在フォームに入っている値（オブジェクトの構造に合わせて変更してください）
                               placeholder="日"
-                              keyboardType="number-pad"
-                              value={formData.birthDay}
-                              onChangeText={(v) => updateForm("birthDay", v)}
+                              onPress={() => setActiveModal("day")}
+                              containerStyle={styles.dateInput}
+                              other="日"
                             />
                           </View>
                         </View>
@@ -171,26 +234,26 @@ export default function RegisterScreen() {
                           </View>
                         </View>
                         <View style={styles.inputContainer}>
-                          <Text style={styles.inputLabel}>出身地</Text>
-                          <TouchableOpacity
-                            style={styles.selectInput}
-                            onPress={() => setShowLocationPicker(true)}
-                          >
-                            <Text
-                              style={[
-                                styles.selectText,
-                                !formData.location &&
-                                  styles.selectTextPlaceholder,
-                              ]}
-                            >
-                              {formData.location || "選択してください"}
-                            </Text>
-                            <Ionicons
-                              name="chevron-down"
-                              size={20}
-                              color="#666"
+                          <View style={styles.inputContainer}>
+                            <Text style={styles.inputLabel}>出身地</Text>
+                            {/* 出身地のトリガー */}
+                            <SelectionTrigger
+                              value={formData.location}
+                              placeholder="出身地を選択"
+                              onPress={() => setActiveModal("location")} // 💡 "location" をセット
                             />
-                          </TouchableOpacity>
+                          </View>
+                          {currentModalConfig && (
+                            <GenericSelectionModal
+                              visible={true} // 表示対象のときだけマウントされるので常にtrueでOK
+                              onClose={() => setActiveModal(null)}
+                              onSelect={handleSelect}
+                              data={currentModalConfig.data}
+                              title={currentModalConfig.title}
+                              placeholder={currentModalConfig.placeholder}
+                              keyboardType={currentModalConfig.keyboardType}
+                            />
+                          )}
                         </View>
                       </>
                     )}
@@ -244,7 +307,7 @@ export default function RegisterScreen() {
                           </Text>
                         )}
                         {getConfirmValidation().missingBirthday && (
-                          <Text style={styles.errorText}>未入力</Text>
+                          <Text style={styles.errorText}>入力値が不正</Text>
                         )}
                       </View>
                     </View>
@@ -305,15 +368,6 @@ export default function RegisterScreen() {
             </View>
           </ScrollView>
         </SafeAreaView>
-
-        <LocationModal
-          visible={showLocationPicker}
-          onClose={() => setShowLocationPicker(false)}
-          onSelect={(item) => {
-            updateForm("location", item);
-            setShowLocationPicker(false);
-          }}
-        />
       </ImageBackground>
     </TouchableWithoutFeedback>
   );
