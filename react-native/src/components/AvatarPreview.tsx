@@ -1,6 +1,6 @@
 import React from 'react';
 import { StyleSheet, View, Image } from 'react-native';
-import { saveAvatarConfig } from './avatarService';
+import { saveAvatarConfig } from '../components/avatarService';
 
 // --- イラスト素材（画像パス）の辞書定義 ---
 export const faceImages: { [key: string]: any } = {
