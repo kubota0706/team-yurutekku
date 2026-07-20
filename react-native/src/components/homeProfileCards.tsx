@@ -4,6 +4,8 @@ import { Text, View, Image } from 'react-native';
 import Svg, { Polygon, Line, Circle } from 'react-native-svg';
 import { baseStyles as styles } from '@/styles/homeProfileStyles';
 import { ProfileDoc, preferences } from '@/types/firebaseDoc'; // 定義場所に合わせてパスを調整してください
+import { ActionButtons } from './ActionButtons';
+import { router } from 'expo-router';
 
 // コンポーネントが受け取るPropsの定義
 interface UserProfileCardProps {
@@ -62,6 +64,10 @@ export default function UserProfileCard({ profile, preferences, status }: UserPr
       return `${x},${y}`;
     }).join(' ');
   };
+
+  const handleNext = () => {
+    router.push('/')
+  }
 
   return (
     <View style={styles.card}>
@@ -157,6 +163,12 @@ export default function UserProfileCard({ profile, preferences, status }: UserPr
           </Svg>
         </View>
       </View>
+
+      <ActionButtons
+        nextLabel='変更'
+        onNext={handleNext}
+      />
+      
     </View>
   );
 }

@@ -1,31 +1,10 @@
 // ProfileScreen.tsx
-import React from 'react';
-import { ScrollView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { ScrollView, ActivityIndicator, View, Text } from 'react-native';
 import UserProfileCard from '@/components/homeProfileCards';
 import { screanStyles } from '@/styles/homeProfileStyles';
 import { ProfileDoc, preferences } from '@/types/firebaseDoc';
-
-// Firestoreから取得することを想定した、新しいデータ構造のダミーデータ
-const dummyProfileDoc: ProfileDoc = {
-  uid: 'user_dummy_123',
-  userName: '窪田優也',
-  gender: 'female',
-  birthday: new Date('2005-07-17'),
-  iconImagePath: 'https://firebasestorage.googleapis.com/v0/b/yurutekku.firebasestorage.app/o/user_avatars%2Favatar_1780966591181_npzvfi.jpg?alt=media&token=215135a9-6734-4fe3-9e2e-a73dacb8ba92',
-  bio: null, // ここをnullにしておくと、UserProfileCard側で項目別のフォールバックテキストが表示されます
-  connectAdd: '0123-456-789', // ニックネームの代わりにconnectAddを使用する例
-  createdAt: new Date(),
-  updatedAt: new Date(),
-  version: 1,
-};
-
-const dummyPreferences: preferences = {
-  uid: 'user_dummy_123',
-  movie: '大阪',    // 行きたい場所のキーがmovieになってしまってるのは後で修正します
-  likedFood: 'ラーメン',
-  hobby: 'カフェ巡り',
-  skill: '散歩',
-};
+import { getLatestData } from '@/dao/firebaseGet';
 
 // パラメーター用の仮データ
 const dummyStatus = {
@@ -36,11 +15,67 @@ const dummyStatus = {
   footSize: 0.5,
 };
 
+// preferencesの仮データ（今回はProfileDocの取得のみ実データ化するため、Preferencesは一旦仮データとして残します）
+const dummyPreferences: preferences = {
+  uid: 'test3',
+  movie: '大阪',
+  likedFood: 'ラーメン',
+  hobby: 'カフェ巡り',
+  skill: '散歩',
+};
+
 export default function ProfileScreen() {
+  const [profile, setProfile] = useState<ProfileDoc | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const TARGET_UID = 'test3'; // テスト用のUID
+
+  useEffect(() => {
+    const fetchProfileData = async () => {
+      try {
+        setIsLoading(true);
+        // user-metaコレクションからversionを取得し、対応する最新のprofileを内部で取得する
+        const data = await getLatestData(TARGET_UID);
+        
+        if (data) {
+          setProfile(data);
+        } else {
+          setError('プロフィールデータが見つかりませんでした。');
+        }
+      } catch (err) {
+        console.error(err);
+        setError('データの取得に失敗しました。');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProfileData();
+  }, []);
+
+  // ローディング中の表示
+  if (isLoading) {
+    return (
+      <View style={[screanStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
+  }
+
+  // エラー発生時の表示
+  if (error || !profile) {
+    return (
+      <View style={[screanStyles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <Text>{error || 'データがありません'}</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={screanStyles.container}>
       <UserProfileCard 
-        profile={dummyProfileDoc} 
+        profile={profile} 
         preferences={dummyPreferences} 
         status={dummyStatus}
       />
