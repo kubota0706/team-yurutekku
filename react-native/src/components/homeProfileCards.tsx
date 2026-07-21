@@ -3,15 +3,13 @@ import React from 'react';
 import { Text, View, Image } from 'react-native';
 import Svg, { Polygon, Line, Circle } from 'react-native-svg';
 import { baseStyles as styles } from '@/styles/homeProfileStyles';
-import { ProfileDoc, preferences } from '@/types/firebaseDoc'; // 定義場所に合わせてパスを調整してください
+import { ProfileDoc, preferences } from '@/types/firebaseDoc';
 import { ActionButtons } from './ActionButtons';
-import { router } from 'expo-router';
 
 // コンポーネントが受け取るPropsの定義
 interface UserProfileCardProps {
   profile: ProfileDoc;
   preferences: preferences;
-  // パラメーターはドキュメントにないため、拡張用、またはbio等からパースする想定の仮定義
   status?: {
     speed: number;
     math: number;
@@ -19,9 +17,10 @@ interface UserProfileCardProps {
     serious: number;
     footSize: number;
   };
+  onEditPress: () => void; // 💡 遷移イベント用のPropsを追加
 }
 
-export default function UserProfileCard({ profile, preferences, status }: UserProfileCardProps) {
+export default function UserProfileCard({ profile, preferences, status, onEditPress }: UserProfileCardProps) {
   // Dateオブジェクトを「YYYY.MM.DD」の形式に変換するヘルパー
   const formatDate = (date: Date | null) => {
     if (!date) return '----.--.--';
@@ -65,10 +64,6 @@ export default function UserProfileCard({ profile, preferences, status }: UserPr
     }).join(' ');
   };
 
-  const handleNext = () => {
-    router.push('/')
-  }
-
   return (
     <View style={styles.card}>
       {/* タイトル */}
@@ -102,7 +97,6 @@ export default function UserProfileCard({ profile, preferences, status }: UserPr
 
       {/* 中部：紹介文文章 */}
       <View style={styles.bioSection}>
-        {/* bio全体をそのまま出す形にするか、プロパティを割り当てるか、DB設計に応じて調整してください */}
         {profile.bio ? (
           <Text style={styles.bioText}>{profile.bio}</Text>
         ) : (
@@ -117,7 +111,7 @@ export default function UserProfileCard({ profile, preferences, status }: UserPr
               しゅみは <Text style={styles.highlightText}>{preferences.hobby || '未設定'}</Text> なんだ〜♪
             </Text>
             <Text style={styles.bioText}>
-              おすすめの映画は <Text style={styles.highlightText}>{preferences.movie || '未設定'}</Text> ！
+              好きな食べ物は <Text style={styles.highlightText}>{preferences.likedFood || '未設定'}</Text> ！
             </Text>
           </>
         )}
@@ -164,9 +158,10 @@ export default function UserProfileCard({ profile, preferences, status }: UserPr
         </View>
       </View>
 
+      {/* 💡 変更ボタンが押された時に、親から渡された実データ付きの関数を発火させる */}
       <ActionButtons
         nextLabel='変更'
-        onNext={handleNext}
+        onNext={onEditPress}
       />
       
     </View>
