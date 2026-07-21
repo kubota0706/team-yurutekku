@@ -23,9 +23,7 @@ const TabIcon = ({
 
 export default function HomeLayout() {
   return (
-    <Tabs
-      screenOptions={tabBarScreenOptions as any}
-    >
+    <Tabs screenOptions={tabBarScreenOptions as any}>
       {/* タブ1: ホーム画面 */}
       <Tabs.Screen
         name="home"
@@ -98,6 +96,14 @@ export default function HomeLayout() {
               focused={focused}
             />
           ),
+        }}
+      />
+
+      <Tabs.Screen
+        name="editProfile" 
+        options={{
+          title: 'プロフィール編集',
+          href: null,
         }}
       />
     </Tabs>

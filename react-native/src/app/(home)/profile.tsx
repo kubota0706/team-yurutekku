@@ -1,10 +1,11 @@
-// ProfileScreen.tsx
 import React, { useEffect, useState } from 'react';
 import { ScrollView, ActivityIndicator, View, Text } from 'react-native';
+import { router, useLocalSearchParams } from 'expo-router'; // 💡 リフレッシュ検知用にuseLocalSearchParamsを追加
 import UserProfileCard from '@/components/homeProfileCards';
 import { screanStyles } from '@/styles/homeProfileStyles';
 import { ProfileDoc, preferences } from '@/types/firebaseDoc';
 import { getLatestData } from '@/dao/firebaseGet';
+import { getPreferencesByVersion } from '@/dao/firebaseGetPreferences'; // 💡 先ほど作成したDAO関数をインポート
 
 // パラメーター用の仮データ
 const dummyStatus = {
@@ -15,31 +16,50 @@ const dummyStatus = {
   footSize: 0.5,
 };
 
-// preferencesの仮データ（今回はProfileDocの取得のみ実データ化するため、Preferencesは一旦仮データとして残します）
-const dummyPreferences: preferences = {
+// preferencesの初期値 / フォールバック用データ
+const defaultPreferences: preferences = {
   uid: 'test3',
-  movie: '大阪',
-  likedFood: 'ラーメン',
-  hobby: 'カフェ巡り',
-  skill: '散歩',
+  movie: '未設定',
+  likedFood: '未設定',
+  hobby: '未設定',
+  skill: '未設定',
 };
 
 export default function ProfileScreen() {
   const [profile, setProfile] = useState<ProfileDoc | null>(null);
+  // 💡 取得したpreferencesを管理するStateを追加
+  const [prefs, setPrefs] = useState<preferences | null>(null); 
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
+
+  // editProfileからrouter.replaceで戻ってきた際のリロード用パラメータを監視
+  const localParams = useLocalSearchParams<{ refresh?: string }>();
 
   const TARGET_UID = 'test3'; // テスト用のUID
 
   useEffect(() => {
-    const fetchProfileData = async () => {
+    const fetchProfileAndPreferences = async () => {
       try {
         setIsLoading(true);
-        // user-metaコレクションからversionを取得し、対応する最新のprofileを内部で取得する
-        const data = await getLatestData(TARGET_UID);
+        setError(null);
+
+        // 1. user-metaコレクションから最新のprofileを取得する
+        const profileData = await getLatestData(TARGET_UID);
         
-        if (data) {
-          setProfile(data);
+        if (profileData) {
+          setProfile(profileData);
+
+          // 2. 💡 取得した最新のversionを利用して、preferencesコレクションからデータを取得する
+          const prefData = await getPreferencesByVersion(TARGET_UID, profileData.version);
+          if (prefData) {
+            setPrefs(prefData);
+          } else {
+            // preferencesが存在しない場合は初期のガワをセット
+            setPrefs({
+              ...defaultPreferences,
+              uid: TARGET_UID,
+            });
+          }
         } else {
           setError('プロフィールデータが見つかりませんでした。');
         }
@@ -51,8 +71,35 @@ export default function ProfileScreen() {
       }
     };
 
-    fetchProfileData();
-  }, []);
+    fetchProfileAndPreferences();
+  }, [localParams.refresh]); // 💡 保存されて戻ってきた際に再読み込みが走るようトリガーに指定
+
+  // 変更ボタンが押された時に、取得したデータを第2引数にのせて遷移する
+  const handleEditNavigate = () => {
+    if (!profile) return;
+
+    // 現在の状態（取得できた実データ、なければデフォルト値）
+    const currentPrefs = prefs || defaultPreferences;
+
+    router.push({
+      pathname: '/editProfile',
+      params: {
+        uid: profile.uid,
+        userName: profile.userName ?? '',
+        connectAdd: profile.connectAdd ?? '',
+        birthday: profile.birthday ? profile.birthday.toISOString() : '', // Date型はシリアライズ用に文字列変換
+        iconImagePath: profile.iconImagePath ?? '',
+        bio: profile.bio ?? '',
+        createdAt: profile.createdAt instanceof Date ? profile.createdAt.toISOString() : '',
+        version: String(profile.version),
+        // 💡 ダミーではなく、実際にFirebaseから持ってきた値を次の画面へ引き渡す
+        movie: currentPrefs.movie ?? '',
+        likedFood: currentPrefs.likedFood ?? '',
+        hobby: currentPrefs.hobby ?? '',
+        skill: currentPrefs.skill ?? '',
+      },
+    });
+  };
 
   // ローディング中の表示
   if (isLoading) {
@@ -73,11 +120,12 @@ export default function ProfileScreen() {
   }
 
   return (
-    <ScrollView contentContainerStyle={screanStyles.container}>
+    <ScrollView contentContainerStyle={screanStyles.container} scrollEnabled={false}>
       <UserProfileCard 
         profile={profile} 
-        preferences={dummyPreferences} 
+        preferences={prefs || defaultPreferences} // 💡 取得した実データをPropsでコンポーネントに渡す
         status={dummyStatus}
+        onEditPress={handleEditNavigate} 
       />
     </ScrollView>
   );
