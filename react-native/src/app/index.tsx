@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useRouter } from 'expo-router';
+import { Link, Redirect, useRouter } from 'expo-router';
 // 💡 TextInput と ScrollView を追加インポート
 import { StyleSheet, Text, View, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 
@@ -21,7 +21,7 @@ export default function ModalScreen() {
     }
   };
 
-  return (
+  const urlScrean = (
     // 画面外に入力フォームが隠れないよう ScrollView に変更
     <ScrollView contentContainerStyle={styles.container}>
       <Text style={styles.title}>test</Text>
@@ -60,6 +60,10 @@ export default function ModalScreen() {
       </Link>
 
     </ScrollView>
+  )
+
+  return (
+    <Redirect href="/profileRegisterBase" />    
   );
 }
 
