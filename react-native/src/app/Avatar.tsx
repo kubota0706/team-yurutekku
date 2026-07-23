@@ -3,7 +3,7 @@ import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Modal, Dimensio
 import { AntDesign } from '@expo/vector-icons';
 import { AvatarPreview } from '../components/AvatarPreview';
 import { ControlPanel } from '../components/ControlPanel';
-import { doc, updateDoc, serverTimestamp } from 'firebase/firestore'; 
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; 
 import { db } from '../dao/firebaseConfig';
 
 type ScreenType = 'Start' | 'Customize';
@@ -37,7 +37,8 @@ export default function App() {
       const userDocRef = doc(db, 'uid-version', currentUidVersion);
 
       // テーブル定義に合わせて「avatar」オブジェクトを更新
-      await updateDoc(userDocRef, {
+      await setDoc(userDocRef, 
+        {
         avatar: {
           color: selectedColor,
           eye: selectedEye,
@@ -46,7 +47,9 @@ export default function App() {
         },
         // 定義書にある共通フィールド「更新日時」を更新
         updatedAt: serverTimestamp(), 
-      });
+      },
+      { merge: true }
+    );
 
       Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。');
       setConfirmModalVisible(false); // 保存できたらポップアップを閉じる
