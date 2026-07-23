@@ -57,8 +57,18 @@ export default function App() {
         { merge: true } // 👈 これが重要です！
       );
 
-      Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。');
-      setConfirmModalVisible(false); // 保存できたらポップアップを閉じる
+      Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。', [
+        {
+          text: 'OK',
+          onPress: () => {
+            // 単一ファイル内で画面を切り替えている場合：
+            setCurrentScreen('Start'); 
+            
+            // もし Expo Router のホーム画面（/home または /）に移動したい場合はこちら：
+            // router.push('/home');
+          },
+        },
+      ]);
 
     } catch (error) {
       console.error('Firebase保存エラー:', error);
