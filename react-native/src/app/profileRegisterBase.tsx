@@ -11,6 +11,11 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { Image } from "expo-image";
+import {
+  useFonts,
+  ZenMaruGothic_500Medium,
+  ZenMaruGothic_900Black,
+} from '@expo-google-fonts/zen-maru-gothic';
 
 import { registerStyles as styles } from "@/styles/profileRegisterBaseStyles";
 import { ActionButtons } from "@/components/ActionButtons";
@@ -89,6 +94,11 @@ const GenderButton = ({
 // --- メイン画面コンポーネント ---
 
 export default function RegisterScreen() {
+  useFonts({
+    ZenMaruGothic_500Medium,
+    ZenMaruGothic_900Black,
+  });
+
   const {
     step,
     formData,
@@ -150,7 +160,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="姓"
-                              value={formData.lastName}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.lastName ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) => updateForm("lastName", v)}
@@ -158,7 +169,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="名"
-                              value={formData.firstName}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.firstName ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) => updateForm("firstName", v)}
@@ -171,7 +183,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="セイ"
-                              value={formData.lastNameKana}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.lastNameKana ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) =>
@@ -181,7 +194,8 @@ export default function RegisterScreen() {
                             <TextInput
                               style={styles.halfInput}
                               placeholder="メイ"
-                              value={formData.firstNameKana}
+                              placeholderTextColor="#7A7A7A"
+                              value={formData.firstNameKana ?? ''}
                               returnKeyType="done"
                               onSubmitEditing={() => Keyboard.dismiss()}
                               onChangeText={(v) =>

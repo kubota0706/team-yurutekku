@@ -27,6 +27,7 @@ export const registerStyles = StyleSheet.create({
 
   inputLabel: {
     fontSize: 14,
+    fontFamily: 'ZenMaruGothic_900Black',
     fontWeight: "bold",
     color: "#553311",
     marginBottom: 6,
@@ -152,13 +153,14 @@ export const registerStyles = StyleSheet.create({
   },
   confirmLabel: {
     fontSize: 14,
+    fontFamily: 'ZenMaruGothic_900Black',
     color: "#666",
     flex: 1,
   },
   confirmValue: {
     fontSize: 14,
+    fontFamily: 'ZenMaruGothic_500Medium',
     color: "#333",
-    fontWeight: "600",
     flex: 1.5, // 値側を少し広く取る
   },
   confirmValueWrapper: {
