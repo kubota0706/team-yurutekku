@@ -26,9 +26,9 @@ export default function App() {
 
   // 🛠️ 【追加場所1】Firebaseへ保存する関数をここに追加します
   const saveAvatarToFirebase = async () => {
+    // 🛠️ 【修正】初回登録・更新の両方に対応する保存関数
+  const saveAvatarToFirebase = async () => {
     try {
-      // 💡 テーブル定義のドキュメントID「uid-version」（例: 123abc-1）の形式に合わせます
-      // 実際はログイン中のユーザーUIDとアプリのバージョンを結合させて指定してください
       const currentUidVersion = '123abc-1'; 
 
       if (!currentUidVersion) {
@@ -39,31 +39,32 @@ export default function App() {
       // コレクション「uid-version」のドキュメントを参照
       const userDocRef = doc(db, 'uid-version', currentUidVersion);
 
-      // テーブル定義に合わせて「avatar」オブジェクトを更新
-      await setDoc(userDocRef, 
+      // 💡 setDoc + merge: true を使うことで、
+      // ・ドキュメントが存在しない場合 ➔ 新規作成（初回登録）
+      // ・ドキュメントが存在する場合 ➔ 指定フィールドのみ更新（2回目以降）
+      // のどちらでも安全に動作します！
+      await setDoc(
+        userDocRef,
         {
-        avatar: {
-          color: selectedColor,
-          eye: selectedEye,
-          brow: selectedBrow,
-          mouth: selectedMouth,
+          avatar: {
+            color: selectedColor,
+            eye: selectedEye,
+            brow: selectedBrow,
+            mouth: selectedMouth,
+          },
+          updatedAt: serverTimestamp(),
         },
-        // 定義書にある共通フィールド「更新日時」を更新
-        updatedAt: serverTimestamp(), 
-      },
-      { merge: true }
-    );
+        { merge: true } // 👈 これが重要です！
+      );
 
-      // Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。');
-
-      router.replace('/(home)/home');
-
+      Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。');
       setConfirmModalVisible(false); // 保存できたらポップアップを閉じる
 
     } catch (error) {
       console.error('Firebase保存エラー:', error);
       Alert.alert('エラー', 'データベースへの保存に失敗しました。');
     }
+  };
   };
 
   // 1. スタート画面
