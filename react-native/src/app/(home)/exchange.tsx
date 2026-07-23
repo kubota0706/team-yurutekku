@@ -14,8 +14,11 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 import QRCode from 'react-native-qrcode-svg';
 import { router } from 'expo-router';
 import { AvatarPreview } from '../../components/AvatarPreview';
+<<<<<<< HEAD
 import { getFirestore, collection, addDoc } from "firebase/firestore";
 import { db } from '@/dao/firebaseConfig';
+=======
+>>>>>>> 22aac7cbd06297c2fde733e64668049923b45c63
 
  // パスは環境に合わせて調整してください
 
@@ -94,7 +97,11 @@ export default function ExchangeScreen() {
   const handleAddFriend = async () => {
     try {
       // 💡 Firestore等への追加処理を呼び出し
+
       await addDoc(collection(db, 'friends'), { userId: scannedUser?.id });
+
+      // await addDoc(collection(db, 'friends'), { userId: scannedUser?.id });
+ 
       
       setIsAdded(true);
     } catch (error) {
