@@ -77,7 +77,7 @@ export const usePreferenceRegister = (uid: string, version: number) => {
         ...preferences,
         uid,
       });
-      router.replace('/');
+      router.replace('/Avatar');
     } catch (error) {
       console.error('[usePreferenceRegister] 保存エラー', error);
       setErrorMessage('保存に失敗しました。もう一度お試しください。');

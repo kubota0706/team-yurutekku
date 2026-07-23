@@ -5,10 +5,13 @@ import { AvatarPreview } from '../components/AvatarPreview';
 import { ControlPanel } from '../components/ControlPanel';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; 
 import { db } from '../dao/firebaseConfig';
+import { useRouter } from 'expo-router';
 
 type ScreenType = 'Start' | 'Customize';
 
 export default function App() {
+  const router = useRouter();
+
   const [currentScreen, setCurrentScreen] = useState<ScreenType>('Start');
   
   // アバターパーツの選択状態 (初期値)
@@ -51,7 +54,10 @@ export default function App() {
       { merge: true }
     );
 
-      Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。');
+      // Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。');
+
+      router.replace('/(home)/home');
+
       setConfirmModalVisible(false); // 保存できたらポップアップを閉じる
 
     } catch (error) {
