@@ -10,6 +10,7 @@
     "web": "expo start --web"
   },
   "dependencies": {
+    "@expo-google-fonts/zen-maru-gothic": "^0.4.1",
     "@expo/vector-icons": "^15.1.1",
     "expo": "~54.0.36",
     "expo-camera": "~17.0.10",
