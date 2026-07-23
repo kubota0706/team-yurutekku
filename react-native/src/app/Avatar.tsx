@@ -28,6 +28,9 @@ export default function App() {
   const saveAvatarToFirebase = async () => {
     // 🛠️ 【修正】初回登録・更新の両方に対応する保存関数
   const saveAvatarToFirebase = async () => {
+    // 💡 1. まずモーダルを閉じる（連打防止＆ユーザー体感の向上）
+    setConfirmModalVisible(false);
+
     try {
       const currentUidVersion = '123abc-1'; 
 
@@ -36,13 +39,9 @@ export default function App() {
         return;
       }
 
-      // コレクション「uid-version」のドキュメントを参照
       const userDocRef = doc(db, 'uid-version', currentUidVersion);
 
-      // 💡 setDoc + merge: true を使うことで、
-      // ・ドキュメントが存在しない場合 ➔ 新規作成（初回登録）
-      // ・ドキュメントが存在する場合 ➔ 指定フィールドのみ更新（2回目以降）
-      // のどちらでも安全に動作します！
+      // Firestore へ保存
       await setDoc(
         userDocRef,
         {
@@ -54,25 +53,27 @@ export default function App() {
           },
           updatedAt: serverTimestamp(),
         },
-        { merge: true } // 👈 これが重要です！
+        { merge: true }
       );
 
-      Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。', [
-        {
-          text: 'OK',
-          onPress: () => {
-            // 単一ファイル内で画面を切り替えている場合：
-            setCurrentScreen('Start'); 
-            
-            // もし Expo Router のホーム画面（/home または /）に移動したい場合はこちら：
-            // router.push('/home');
-          },
-        },
-      ]);
+      console.log('Firebase保存成功！');
+
+      // 💡 2. 保存成功したら画面を切り替える
+      setCurrentScreen('Start'); 
+      // ※もし Expo Router でホームへ行きたい場合は: router.push('/home');
 
     } catch (error) {
-      console.error('Firebase保存エラー:', error);
-      Alert.alert('エラー', 'データベースへの保存に失敗しました。');
+      // 💡 3. エラー内容をターミナルに詳しく表示
+      console.error('Firebase保存エラーの詳細:', error);
+      
+      Alert.alert(
+        '保存エラー',
+        'データベースへの保存に失敗しましたが、画面を移動しますか？',
+        [
+          { text: 'キャンセル', style: 'cancel' },
+          { text: '移動する', onPress: () => setCurrentScreen('Start') },
+        ]
+      );
     }
   };
   };
