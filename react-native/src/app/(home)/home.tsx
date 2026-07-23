@@ -14,10 +14,10 @@ import { router } from 'expo-router';
 
 // 💡 Firebase 関連
 import { collection, onSnapshot, query } from 'firebase/firestore';
-import { db } from '../dao/firebaseConfig';
+import { db } from '@/dao/firebaseConfig';
 
 // アバター表示用コンポーネント
-import { AvatarPreview } from '../components/AvatarPreview';
+import { AvatarPreview } from '@/components/AvatarPreview';
 
 // 友達データの型定義
 interface Friend {
