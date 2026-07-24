@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
-import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Modal, Dimensions, ImageBackground, Alert } from 'react-native'; // 👈 Alert を追加
+import { StyleSheet, Text, View, TouchableOpacity, SafeAreaView, Modal, Dimensions, ImageBackground, Alert } from 'react-native';
 import { AntDesign } from '@expo/vector-icons';
 import { AvatarPreview } from '../components/AvatarPreview';
 import { ControlPanel } from '../components/ControlPanel';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore'; 
 import { db } from '../dao/firebaseConfig';
 import { useRouter } from 'expo-router';
+import { getAuth } from 'firebase/auth';
 
 type ScreenType = 'Start' | 'Customize';
 
@@ -24,48 +25,49 @@ export default function App() {
   const [backModalVisible, setBackModalVisible] = useState<boolean>(false);
   const [confirmModalVisible, setConfirmModalVisible] = useState<boolean>(false);
 
-  // 🛠️ 【追加場所1】Firebaseへ保存する関数をここに追加します
+  // 💡 Firebaseへ保存してホーム画面へ遷移する関数
   const saveAvatarToFirebase = async () => {
-    try {
-      // 💡 テーブル定義のドキュメントID「uid-version」（例: 123abc-1）の形式に合わせます
-      // 実際はログイン中のユーザーUIDとアプリのバージョンを結合させて指定してください
-      const currentUidVersion = '123abc-1'; 
+    // 1. モーダルを閉じる
+    setConfirmModalVisible(false);
 
-      if (!currentUidVersion) {
-        Alert.alert('エラー', 'ユーザー情報が見つかりません');
+    try {
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+
+      if (!currentUser) {
+        console.warn('ログイン状態が確認できませんでした。');
+        router.push('/home'); // 👈 未ログイン時も (home)/home.tsx へ遷移
         return;
       }
 
-      // コレクション「uid-version」のドキュメントを参照
-      const userDocRef = doc(db, 'uid-version', currentUidVersion);
+      const myUid = currentUser.uid; 
+      const userDocRef = doc(db, 'uid-version', myUid);
 
-      // テーブル定義に合わせて「avatar」オブジェクトを更新
-      await setDoc(userDocRef, 
+      // 2. Firestore へ保存
+      await setDoc(
+        userDocRef,
         {
-        avatar: {
-          color: selectedColor,
-          eye: selectedEye,
-          brow: selectedBrow,
-          mouth: selectedMouth,
+          avatar: {
+            color: selectedColor,
+            eye: selectedEye,
+            brow: selectedBrow,
+            mouth: selectedMouth,
+          },
+          updatedAt: serverTimestamp(),
         },
-        // 定義書にある共通フィールド「更新日時」を更新
-        updatedAt: serverTimestamp(), 
-      },
-      { merge: true }
-    );
+        { merge: true }
+      );
 
-      // Alert.alert('保存完了！', 'データベースにアバター情報を保存しました。');
-
-      router.replace('/(home)/home');
-
-      setConfirmModalVisible(false); // 保存できたらポップアップを閉じる
+      console.log('Firebase保存成功！');
 
     } catch (error) {
-      console.error('Firebase保存エラー:', error);
-      Alert.alert('エラー', 'データベースへの保存に失敗しました。');
+      console.error('Firebase保存エラーの詳細:', error);
+    } finally {
+      // 3. 💡 (home)/home.tsx へ遷移
+      router.push('/home'); // 👈 こちらに変更！
     }
   };
-
+  
   // 1. スタート画面
   if (currentScreen === 'Start') {
     return (
@@ -103,7 +105,7 @@ export default function App() {
           mouth={selectedMouth}
         />
 
-        {/* 戻るボタンと決定ボタンをアバターの下に配置 */}
+        {/* 戻るボタンと決定ボタン */}
         <View style={styles.buttonRow}>
           <TouchableOpacity style={styles.backButton} onPress={() => setBackModalVisible(true)}>
             <AntDesign name="arrow-left" size={24} color="#3B82F6" />
@@ -115,7 +117,7 @@ export default function App() {
         </View>
       </ImageBackground>
 
-      {/* 切り分けたコントロールパネルの呼び出し */}
+      {/* コントロールパネル */}
       <ControlPanel
         selectedColor={selectedColor}
         setSelectedColor={setSelectedColor}
@@ -166,7 +168,6 @@ export default function App() {
                 <Text style={styles.btnNoText}>いいえ</Text>
               </TouchableOpacity>
               
-              {/* 🛠️ 【追加場所2】「はい」の onPress を変更して作成した関数を呼び出します */}
               <TouchableOpacity style={[styles.modalButton, styles.btnYes]} onPress={saveAvatarToFirebase}>
                 <Text style={styles.btnYesText}>はい</Text>
               </TouchableOpacity>
@@ -182,8 +183,8 @@ const { width } = Dimensions.get('window');
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFDD48' },
   startContainer: { flex: 1, backgroundColor: '#FFF01C', justifyContent: 'center', alignItems: 'center' },
-  backgroundImage: {flex: 1, width: '100%', height: '100%'},
-  buttonContainer: {flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 140},
+  backgroundImage: { flex: 1, width: '100%', height: '100%' },
+  buttonContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingTop: 140 },
   primaryButton: { marginTop: 40, backgroundColor: '#3B82F6', paddingVertical: 14, paddingHorizontal: 48, borderRadius: 30 },
   primaryButtonText: { color: '#fff', fontSize: 18, fontWeight: 'bold' },
 
@@ -204,7 +205,7 @@ const styles = StyleSheet.create({
     top: 40 
   },
   
-  buttonRow: {flexDirection: 'row', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20, alignItems: 'center', position: 'absolute', bottom: 20, left: 0, right: 0},
+  buttonRow: { flexDirection: 'row', width: '100%', justifyContent: 'space-between', paddingHorizontal: 20, alignItems: 'center', position: 'absolute', bottom: 20, left: 0, right: 0 },
   backButton: { backgroundColor: '#fff', width: 50, height: 50, borderRadius: 25, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
   submitButton: { backgroundColor: '#3B82F6', paddingVertical: 12, paddingHorizontal: 40, borderRadius: 25, shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.1, shadowRadius: 3, elevation: 3 },
   submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
