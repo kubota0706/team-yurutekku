@@ -162,34 +162,6 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
-
-      {/* ボトムナビゲーション */}
-      <View style={styles.bottomTab}>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="home" size={26} color="#000" />
-          <Text style={[styles.tabLabel, styles.activeTabLabel]}>ホーム</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/memory' as any)}>
-          <Ionicons name="camera-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>おもいで</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/friends' as any)}>
-          <Ionicons name="people-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>ともだち</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/exchange')}>
-          <Ionicons name="qr-code-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>こうかん</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/Avatar')}>
-          <MaterialCommunityIcons name="account-details-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>プロフィール</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
