@@ -6,15 +6,15 @@ import {
   TouchableOpacity,
   SafeAreaView,
   ScrollView,
-  Dimensions,
   ActivityIndicator,
 } from 'react-native';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 // 💡 Firebase 関連
-import { collection, onSnapshot, query } from 'firebase/firestore';
+import { collection, onSnapshot } from 'firebase/firestore';
 import { db } from '@/dao/firebaseConfig';
+import { getAuth } from 'firebase/auth';
 
 // アバター表示用コンポーネント
 import { AvatarPreview } from '@/components/AvatarPreview';
@@ -32,19 +32,44 @@ interface Friend {
   offsetX?: number;
 }
 
+// 💡 画面確認用デモデータ（常に使えるように定義）
+const DEMO_FRIENDS: Friend[] = [
+  { id: '1', isNew: true, avatar: { color: 'yellow', eye: 'sleepy', brow: 'none', mouth: 'normal' }, offsetX: -50 },
+  { id: '2', isNew: true, avatar: { color: 'Pink', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: 40 },
+  { id: '3', isNew: false, avatar: { color: 'red', eye: 'angry', brow: 'none', mouth: 'normal' }, offsetX: -10 },
+  { id: '4', isNew: false, avatar: { color: 'blue', eye: 'smile', brow: 'none', mouth: 'normal' }, offsetX: -60 },
+  { id: '5', isNew: false, avatar: { color: 'yellow', eye: 'smirk', brow: 'none', mouth: 'normal' }, offsetX: 30 },
+  { id: '6', isNew: false, avatar: { color: 'red', eye: 'slant', brow: 'none', mouth: 'normal' }, offsetX: -40 },
+];
+
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
-  const [friends, setFriends] = useState<Friend[]>([]);
-  const [exchangeCount, setExchangeCount] = useState(0);
+  const [friends, setFriends] = useState<Friend[]>(DEMO_FRIENDS);
+  const [exchangeCount, setExchangeCount] = useState(DEMO_FRIENDS.length);
 
-  const currentMonth = '6月';
+  // 💡 現実の時間を取得して「○月」にする
+  const currentMonth = `${new Date().getMonth() + 1}月`;
 
   useEffect(() => {
-    // 💡 データベースから友達一覧を取得
-    const q = query(collection(db, 'uid-version'));
+    // デモデータを初期セット
+    setFriends(DEMO_FRIENDS);
+    setExchangeCount(DEMO_FRIENDS.length);
+
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    // ログインしていない場合でもデモデータを表示したままローディング解除
+    if (!currentUser) {
+      console.log('未ログインのためデモデータを表示します');
+      setLoading(false);
+      return;
+    }
+
+    const myUid = currentUser.uid;
+    const friendsRef = collection(db, 'users', myUid, 'friends');
 
     const unsubscribe = onSnapshot(
-      q,
+      friendsRef,
       (snapshot) => {
         const friendList: Friend[] = [];
         snapshot.forEach((doc) => {
@@ -58,19 +83,8 @@ export default function HomeScreen() {
           }
         });
 
-        // 取得データがない場合のダミー表示（確認用）
-        if (friendList.length === 0) {
-          setFriends([
-            { id: '1', isNew: true, avatar: { color: 'blue', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: 40 },
-            { id: '2', isNew: true, avatar: { color: 'yellow', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: -50 },
-            { id: '3', isNew: false, avatar: { color: 'red', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: 0 },
-            { id: '4', isNew: false, avatar: { color: 'blue', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: -40 },
-            { id: '5', isNew: false, avatar: { color: 'yellow', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: 30 },
-            { id: '6', isNew: false, avatar: { color: 'red', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: -60 },
-            { id: '7', isNew: true, avatar: { color: 'green', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: 10 },
-          ]);
-          setExchangeCount(6);
-        } else {
+        // 💡 Firestore にデータがあれば実データを表示、なければデモデータ表示
+        if (friendList.length > 0) {
           setFriends(friendList);
           setExchangeCount(friendList.length);
         }
@@ -78,7 +92,7 @@ export default function HomeScreen() {
         setLoading(false);
       },
       (error) => {
-        console.error('Firestore 受信エラー:', error);
+        console.error('Firestore 受信エラー (デモデータを表示します):', error);
         setLoading(false);
       }
     );
@@ -111,21 +125,28 @@ export default function HomeScreen() {
       {/* ノート風背景 & アバター配置 */}
       <View style={styles.notebookContainer}>
         <View style={styles.linesBackground}>
-          {[...Array(8)].map((_, i) => (
+          {[...Array(9)].map((_, i) => (
             <View key={i} style={styles.line} />
           ))}
         </View>
 
-        <ScrollView contentContainerStyle={styles.avatarCloud}>
+        <ScrollView contentContainerStyle={styles.avatarCloud} showsVerticalScrollIndicator={false}>
           {friends.map((item, index) => {
-            const marginOffset = item.offsetX ?? (index % 2 === 0 ? 30 : -30);
+            // 画像のようにキュッと密集させるためのマージン計算
+            const defaultOffset = index % 2 === 0 ? 30 : -35;
+            const marginOffset = item.offsetX ?? defaultOffset;
 
             return (
               <View
                 key={item.id || index}
                 style={[
                   styles.avatarWrapper,
-                  { marginLeft: marginOffset, marginTop: index === 0 ? 0 : -25 },
+                  {
+                    marginLeft: marginOffset,
+                    // 2番目以降のアバターを上に重ねてギュッとまとめる
+                    marginTop: index === 0 ? 10 : -35,
+                    zIndex: index,
+                  },
                 ]}
               >
                 <View style={styles.avatarCircle}>
@@ -163,33 +184,6 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      {/* ボトムナビゲーション */}
-      <View style={styles.bottomTab}>
-        <TouchableOpacity style={styles.tabItem}>
-          <Ionicons name="home" size={26} color="#000" />
-          <Text style={[styles.tabLabel, styles.activeTabLabel]}>ホーム</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/memory' as any)}>
-          <Ionicons name="camera-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>おもいで</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/friends' as any)}>
-          <Ionicons name="people-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>ともだち</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/exchange')}>
-          <Ionicons name="qr-code-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>こうかん</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.tabItem} onPress={() => router.push('/Avatar')}>
-          <MaterialCommunityIcons name="account-details-outline" size={26} color="#8E8E93" />
-          <Text style={styles.tabLabel}>プロフィール</Text>
-        </TouchableOpacity>
-      </View>
     </SafeAreaView>
   );
 }
@@ -212,18 +206,16 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     paddingBottom: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: '#E0DCD7',
   },
   monthText: {
-    fontSize: 32,
+    fontSize: 36,
     fontWeight: '900',
-    color: '#3F2D20',
+    color: '#2C1E11',
   },
   subText: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#3F2D20',
+    color: '#2C1E11',
     marginTop: 2,
   },
   notificationBtn: {
@@ -246,8 +238,8 @@ const styles = StyleSheet.create({
   },
   linesBackground: {
     ...StyleSheet.absoluteFillObject,
-    justifyContent: 'space-evenly',
-    paddingVertical: 20,
+    justifyContent: 'space-between',
+    paddingVertical: 10,
     zIndex: 0,
   },
   line: {
@@ -257,18 +249,18 @@ const styles = StyleSheet.create({
   },
   avatarCloud: {
     alignItems: 'center',
-    paddingVertical: 30,
+    paddingVertical: 10,
+    paddingBottom: 20,
     zIndex: 1,
   },
   avatarWrapper: {
     position: 'relative',
-    marginVertical: 4,
   },
   avatarCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    borderWidth: 3,
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    borderWidth: 3.5,
     borderColor: '#000',
     backgroundColor: '#fff',
     overflow: 'hidden',
@@ -277,15 +269,16 @@ const styles = StyleSheet.create({
   },
   newBadge: {
     position: 'absolute',
-    top: -5,
-    right: -10,
+    top: -6,
+    right: -12,
     backgroundColor: '#E7FD54',
     borderWidth: 2,
     borderColor: '#000',
     paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
     transform: [{ rotate: '12deg' }],
+    zIndex: 10,
   },
   newBadgeText: {
     fontSize: 10,
@@ -297,13 +290,13 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 24,
-    paddingBottom: 20,
+    paddingBottom: 16,
     zIndex: 2,
   },
   circleIconButton: {
-    width: 54,
-    height: 54,
-    borderRadius: 27,
+    width: 56,
+    height: 56,
+    borderRadius: 28,
     backgroundColor: '#52C7F2',
     justifyContent: 'center',
     alignItems: 'center',
