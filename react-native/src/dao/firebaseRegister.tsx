@@ -27,9 +27,7 @@ export const registerProfileBase = async (profileData: ProfileDoc): Promise<void
     await setDoc(profileDocRef, profileDocument);
     console.log(`[DAO] profile ドキュメント登録成功 (${profileData.uid}-1)`);
 
-    if(profileData.iconImagePath) {
-      setUserMetaVersion(profileData.uid, 1)
-  }
+    await setUserMetaVersion(profileData.uid, 1)
   } catch (error) {
     console.error('[DAO] profile ドキュメント登録に失敗しました:', error);
     throw error;
@@ -49,7 +47,7 @@ export const setUserMetaVersion = async (uid: string, version: number): Promise<
 
   const userMetaDocRef = doc(db, 'user-meta', uid);
   const userMetaDocument = {
-    version,
+    version: version,
     updatedAt: serverTimestamp(),
   };
 
