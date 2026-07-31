@@ -7,6 +7,7 @@ import {
   SafeAreaView,
   ScrollView,
   ActivityIndicator,
+  Modal,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
@@ -19,9 +20,10 @@ import { getAuth } from 'firebase/auth';
 // アバター表示用コンポーネント
 import { AvatarPreview } from '@/components/AvatarPreview';
 
-// 友達データの型定義（top, left, zIndex を追加）
+// 友達データの型定義
 interface Friend {
   id: string;
+  name: string;
   isNew?: boolean;
   avatar: {
     color: string;
@@ -34,35 +36,53 @@ interface Friend {
   zIndex?: number;
 }
 
-// 💡 画面確認用デモデータ（ばらけた配置とバランスの良い顔パーツ構成）
+// 💡 ランダム位置を自動生成する関数
+const generateRandomPosition = (index: number, totalCount: number) => {
+  const minTop = 20;
+  const maxTop = 320;
+  const minLeft = 5;
+
+  const topStep = (maxTop - minTop) / Math.max(totalCount, 1);
+  const randomTop = minTop + topStep * index + (Math.random() * 20 - 10);
+  const baseLeft = index % 2 === 0 ? minLeft + Math.random() * 25 : 40 + Math.random() * 25;
+
+  return {
+    top: Math.max(minTop, Math.min(maxTop, randomTop)),
+    left: `${Math.max(minLeft, Math.min(68, baseLeft))}%`,
+    zIndex: Math.floor(Math.random() * 10) + 1,
+  };
+};
+
+// 💡 デモデータ（自動ランダム計算付き）
 const DEMO_FRIENDS: Friend[] = [
-  { id: '1', avatar: { color: 'blue', eye: 'sleepy', brow: 'droopy', mouth: 'open' }, top: 20, left: '55%', zIndex: 3 },
-  { id: '2', avatar: { color: 'yellow', eye: 'normal', brow: 'one', mouth: 'normal' }, top: 80, left: '10%', zIndex: 2 },
-  { id: '3', avatar: { color: 'red', eye: 'smile', brow: 'slanting', mouth: 'smile' }, top: 110, left: '38%', zIndex: 4 },
-  { id: '4', avatar: { color: 'Pink', eye: 'smirk', brow: 'problems', mouth: 'lick' }, top: 200, left: '60%', zIndex: 1 },
-  { id: '5', avatar: { color: 'green', eye: 'normal', brow: 'one', mouth: 'circle' }, top: 230, left: '18%', zIndex: 2 },
-  { id: '6', avatar: { color: 'Purple', eye: 'angry', brow: 'angry', mouth: 'sad' }, top: 310, left: '48%', zIndex: 3 },
-  { id: '7', avatar: { color: 'blue', eye: 'slant', brow: 'droopy', mouth: 'open' }, top: 360, left: '8%', zIndex: 1 },
-];
+  { id: '1', name: '今川なな代', avatar: { color: 'blue', eye: 'sleepy', brow: 'droopy', mouth: 'open' } },
+  { id: '2', name: '田中たろう', avatar: { color: 'yellow', eye: 'normal', brow: 'one', mouth: 'normal' } },
+  { id: '3', name: '佐藤はな子', avatar: { color: 'red', eye: 'smile', brow: 'slanting', mouth: 'smile' } },
+  { id: '4', name: '鈴木けんじ', avatar: { color: 'pink', eye: 'smirk', brow: 'problems', mouth: 'lick' } },
+  { id: '5', name: '高橋まみ', avatar: { color: 'green', eye: 'normal', brow: 'one', mouth: 'circle' } },
+  { id: '6', name: '渡辺たかし', avatar: { color: 'purple', eye: 'angry', brow: 'angry', mouth: 'sad' } },
+].map((item, index, arr) => ({
+  ...item,
+  ...generateRandomPosition(index, arr.length),
+}));
 
 export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [friends, setFriends] = useState<Friend[]>(DEMO_FRIENDS);
   const [exchangeCount, setExchangeCount] = useState(DEMO_FRIENDS.length);
 
-  // 💡 現実の時間を取得して「○月」にする
+  // 💡 選択中の友達（簡易プロフィール用Modalのstate）
+  const [selectedFriend, setSelectedFriend] = useState<Friend | null>(null);
+
   const currentMonth = `${new Date().getMonth() + 1}月`;
 
   useEffect(() => {
-    // デモデータを初期セット
-    setFriends(DEMO_FRIENDS);
-    setExchangeCount(DEMO_FRIENDS.length);
-
     const auth = getAuth();
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
-      console.log('未ログインのためデモデータを表示します');
+      setFriends(DEMO_FRIENDS);
+      setExchangeCount(DEMO_FRIENDS.length);
       setLoading(false);
       return;
     }
@@ -71,44 +91,58 @@ export default function HomeScreen() {
     const friendsRef = collection(db, 'users', myUid, 'friends');
 
     const unsubscribe = onSnapshot(
-  friendsRef,
-  (snapshot) => {
-    const friendList: Friend[] = [];
+      friendsRef,
+      (snapshot) => {
+        const friendList: Friend[] = [];
+        let index = 0;
+        const total = snapshot.docs.length;
 
-    // 💡 index を外側でカウントする
-    let index = 0;
-    snapshot.forEach((doc) => {
-      const data = doc.data();
-      if (data.avatar) {
-        // Firestore から取得したデータにもばらけさせる座標を自動付与
-        const fallback = DEMO_FRIENDS[index % DEMO_FRIENDS.length];
-        friendList.push({
-          id: doc.id,
-          isNew: data.isNew ?? false,
-          avatar: data.avatar,
-          top: data.top ?? fallback.top,
-          left: data.left ?? fallback.left,
-          zIndex: data.zIndex ?? fallback.zIndex,
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          if (data.avatar) {
+            const pos = generateRandomPosition(index, total);
+            friendList.push({
+              id: doc.id,
+              name: data.name || data.nickname || 'ななし',
+              isNew: data.isNew ?? false,
+              avatar: data.avatar,
+              top: pos.top,
+              left: pos.left,
+              zIndex: pos.zIndex,
+            });
+          }
+          index++;
         });
+
+        if (friendList.length > 0) {
+          setFriends(friendList);
+          setExchangeCount(friendList.length);
+        } else {
+          setFriends(DEMO_FRIENDS);
+        }
+
+        setLoading(false);
+      },
+      (error) => {
+        console.error('Firestore 受信エラー:', error);
+        setFriends(DEMO_FRIENDS);
+        setLoading(false);
       }
-      index++; // インデックスをインクリメント
-    });
-
-    if (friendList.length > 0) {
-      setFriends(friendList);
-      setExchangeCount(friendList.length);
-    }
-
-    setLoading(false);
-  },
-  (error) => {
-    console.error('Firestore 受信エラー (デモデータを表示します):', error);
-    setLoading(false);
-  }
-);
+    );
 
     return () => unsubscribe();
   }, []);
+
+  // 💡 詳細プロフィール画面へ遷移
+  const goToFullProfile = () => {
+    if (!selectedFriend) return;
+    const friendUid = selectedFriend.id;
+    setSelectedFriend(null); // モーダルを閉じる
+    router.push({
+      pathname: '/profile',
+      params: { uid: friendUid, isFriend: 'true' },
+    });
+  };
 
   if (loading) {
     return (
@@ -134,54 +168,48 @@ export default function HomeScreen() {
 
       {/* ノート風背景 & アバター配置 */}
       <View style={styles.notebookContainer}>
-        {/* 背景の罫線 */}
         <View style={styles.linesBackground}>
           {[...Array(9)].map((_, i) => (
             <View key={i} style={styles.line} />
           ))}
         </View>
 
-        {/* 💡 アバターをランダム配置するためのスクロールエリア */}
         <ScrollView
           contentContainerStyle={styles.avatarCloudContainer}
           showsVerticalScrollIndicator={false}
         >
-          {friends.map((item, index) => {
-            const topPos = item.top ?? 20 + index * 60;
-            const leftPos = item.left ?? (index % 2 === 0 ? '15%' : '50%');
-            const zIndexVal = item.zIndex ?? index;
+          {friends.map((item, index) => (
+            <TouchableOpacity
+              key={item.id || index}
+              activeOpacity={0.8}
+              onPress={() => setSelectedFriend(item)} // 💡 タップで簡易プロフィールを開く
+              style={[
+                styles.avatarWrapper,
+                {
+                  top: item.top ?? 20,
+                  left: item.left as any,
+                  zIndex: item.zIndex ?? index,
+                },
+              ]}
+            >
+              <AvatarPreview
+                color={item.avatar.color?.toLowerCase()}
+                eye={item.avatar.eye}
+                brow={item.avatar.brow}
+                mouth={item.avatar.mouth}
+                size={120}
+              />
 
-            return (
-              <View
-                key={item.id || index}
-                style={[
-                  styles.avatarWrapper,
-                  {
-                    top: topPos,
-                    left: leftPos as any,
-                    zIndex: zIndexVal,
-                  },
-                ]}
-              >
-                <AvatarPreview
-                  color={item.avatar.color}
-                  eye={item.avatar.eye}
-                  brow={item.avatar.brow}
-                  mouth={item.avatar.mouth}
-                  size={120} // ホーム画面用の扱いやすいサイズ
-                />
-
-                {item.isNew && (
-                  <View style={styles.newBadge}>
-                    <Text style={styles.newBadgeText}>NEW</Text>
-                  </View>
-                )}
-              </View>
-            );
-          })}
+              {item.isNew && (
+                <View style={styles.newBadge}>
+                  <Text style={styles.newBadgeText}>NEW</Text>
+                </View>
+              )}
+            </TouchableOpacity>
+          ))}
         </ScrollView>
 
-        {/* アクションボタン（星・まとめてみる・カート） */}
+        {/* アクションボタン */}
         <View style={styles.actionRow}>
           <TouchableOpacity style={styles.circleIconButton}>
             <Ionicons name="star" size={26} color="#fff" />
@@ -196,6 +224,52 @@ export default function HomeScreen() {
           </TouchableOpacity>
         </View>
       </View>
+
+      {/* 💡 簡易プロフィール ポップアップ (Modal) */}
+      <Modal
+        visible={selectedFriend !== null}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setSelectedFriend(null)}
+      >
+        <TouchableOpacity
+          style={styles.modalOverlay}
+          activeOpacity={1}
+          onPress={() => setSelectedFriend(null)}
+        >
+          {selectedFriend && (
+            <TouchableOpacity activeOpacity={1} style={styles.modalCard}>
+              {/* 閉じるボタン */}
+              <TouchableOpacity
+                style={styles.closeBtn}
+                onPress={() => setSelectedFriend(null)}
+              >
+                <Ionicons name="close" size={24} color="#666" />
+              </TouchableOpacity>
+
+              {/* アバター */}
+              <View style={styles.modalAvatarContainer}>
+                <AvatarPreview
+                  color={selectedFriend.avatar.color?.toLowerCase()}
+                  eye={selectedFriend.avatar.eye}
+                  brow={selectedFriend.avatar.brow}
+                  mouth={selectedFriend.avatar.mouth}
+                  size={110}
+                />
+              </View>
+
+              {/* 名前 */}
+              <Text style={styles.modalName}>{selectedFriend.name}</Text>
+
+              {/* 詳細プロフィールボタン */}
+              <TouchableOpacity style={styles.detailBtn} onPress={goToFullProfile}>
+                <Text style={styles.detailBtnText}>プロフィールを見る</Text>
+                <Ionicons name="chevron-forward" size={18} color="#fff" />
+              </TouchableOpacity>
+            </TouchableOpacity>
+          )}
+        </TouchableOpacity>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -260,12 +334,12 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   avatarCloudContainer: {
-    height: 480, // 💡 アバターが散らばる自由領域の高さ
+    height: 440,
     position: 'relative',
     zIndex: 1,
   },
   avatarWrapper: {
-    position: 'absolute', // 💡 top / left で自由に散らばせる
+    position: 'absolute',
   },
   newBadge: {
     position: 'absolute',
@@ -316,5 +390,57 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
+  },
+
+  /* 💡 簡易プロフィール (Modal) スタイル */
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.4)',
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 30,
+  },
+  modalCard: {
+    width: '100%',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 24,
+    padding: 24,
+    alignItems: 'center',
+    position: 'relative',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 6,
+  },
+  closeBtn: {
+    position: 'absolute',
+    top: 16,
+    right: 16,
+    padding: 4,
+  },
+  modalAvatarContainer: {
+    marginTop: 10,
+    marginBottom: 12,
+  },
+  modalName: {
+    fontSize: 22,
+    fontWeight: 'bold',
+    color: '#1F2937',
+    marginBottom: 20,
+  },
+  detailBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#3B82F6',
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 20,
+  },
+  detailBtnText: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: 'bold',
+    marginRight: 6,
   },
 });

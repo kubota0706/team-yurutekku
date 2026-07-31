@@ -7,8 +7,8 @@ export const faceImages: { [key: string]: any } = {
   red: require('../assets/avatar/faces/red.png'),
   yellow: require('../assets/avatar/faces/yellow.png'),
   green: require('../assets/avatar/faces/green.png'),
-  Purple: require('../assets/avatar/faces/purple.png'),
-  Pink: require('../assets/avatar/faces/pink.png'),
+  purple: require('../assets/avatar/faces/purple.png'),
+  pink: require('../assets/avatar/faces/pink.png'),
 };
 
 export const eyeImages: { [key: string]: any } = {
