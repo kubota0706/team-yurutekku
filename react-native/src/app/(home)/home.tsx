@@ -8,7 +8,7 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { router } from 'expo-router';
 
 // 💡 Firebase 関連
@@ -19,7 +19,7 @@ import { getAuth } from 'firebase/auth';
 // アバター表示用コンポーネント
 import { AvatarPreview } from '@/components/AvatarPreview';
 
-// 友達データの型定義
+// 友達データの型定義（top, left, zIndex を追加）
 interface Friend {
   id: string;
   isNew?: boolean;
@@ -29,17 +29,20 @@ interface Friend {
     brow: string;
     mouth: string;
   };
-  offsetX?: number;
+  top?: number;
+  left?: string | number;
+  zIndex?: number;
 }
 
-// 💡 画面確認用デモデータ（常に使えるように定義）
+// 💡 画面確認用デモデータ（ばらけた配置とバランスの良い顔パーツ構成）
 const DEMO_FRIENDS: Friend[] = [
-  { id: '1', isNew: true, avatar: { color: 'yellow', eye: 'sleepy', brow: 'none', mouth: 'normal' }, offsetX: -50 },
-  { id: '2', isNew: true, avatar: { color: 'Pink', eye: 'normal', brow: 'none', mouth: 'normal' }, offsetX: 40 },
-  { id: '3', isNew: false, avatar: { color: 'red', eye: 'angry', brow: 'none', mouth: 'normal' }, offsetX: -10 },
-  { id: '4', isNew: false, avatar: { color: 'blue', eye: 'smile', brow: 'none', mouth: 'normal' }, offsetX: -60 },
-  { id: '5', isNew: false, avatar: { color: 'yellow', eye: 'smirk', brow: 'none', mouth: 'normal' }, offsetX: 30 },
-  { id: '6', isNew: false, avatar: { color: 'red', eye: 'slant', brow: 'none', mouth: 'normal' }, offsetX: -40 },
+  { id: '1', avatar: { color: 'blue', eye: 'sleepy', brow: 'droopy', mouth: 'open' }, top: 20, left: '55%', zIndex: 3 },
+  { id: '2', avatar: { color: 'yellow', eye: 'normal', brow: 'one', mouth: 'normal' }, top: 80, left: '10%', zIndex: 2 },
+  { id: '3', avatar: { color: 'red', eye: 'smile', brow: 'slanting', mouth: 'smile' }, top: 110, left: '38%', zIndex: 4 },
+  { id: '4', avatar: { color: 'Pink', eye: 'smirk', brow: 'problems', mouth: 'lick' }, top: 200, left: '60%', zIndex: 1 },
+  { id: '5', avatar: { color: 'green', eye: 'normal', brow: 'one', mouth: 'circle' }, top: 230, left: '18%', zIndex: 2 },
+  { id: '6', avatar: { color: 'Purple', eye: 'angry', brow: 'angry', mouth: 'sad' }, top: 310, left: '48%', zIndex: 3 },
+  { id: '7', avatar: { color: 'blue', eye: 'slant', brow: 'droopy', mouth: 'open' }, top: 360, left: '8%', zIndex: 1 },
 ];
 
 export default function HomeScreen() {
@@ -58,7 +61,6 @@ export default function HomeScreen() {
     const auth = getAuth();
     const currentUser = auth.currentUser;
 
-    // ログインしていない場合でもデモデータを表示したままローディング解除
     if (!currentUser) {
       console.log('未ログインのためデモデータを表示します');
       setLoading(false);
@@ -69,33 +71,41 @@ export default function HomeScreen() {
     const friendsRef = collection(db, 'users', myUid, 'friends');
 
     const unsubscribe = onSnapshot(
-      friendsRef,
-      (snapshot) => {
-        const friendList: Friend[] = [];
-        snapshot.forEach((doc) => {
-          const data = doc.data();
-          if (data.avatar) {
-            friendList.push({
-              id: doc.id,
-              isNew: data.isNew ?? false,
-              avatar: data.avatar,
-            });
-          }
+  friendsRef,
+  (snapshot) => {
+    const friendList: Friend[] = [];
+
+    // 💡 index を外側でカウントする
+    let index = 0;
+    snapshot.forEach((doc) => {
+      const data = doc.data();
+      if (data.avatar) {
+        // Firestore から取得したデータにもばらけさせる座標を自動付与
+        const fallback = DEMO_FRIENDS[index % DEMO_FRIENDS.length];
+        friendList.push({
+          id: doc.id,
+          isNew: data.isNew ?? false,
+          avatar: data.avatar,
+          top: data.top ?? fallback.top,
+          left: data.left ?? fallback.left,
+          zIndex: data.zIndex ?? fallback.zIndex,
         });
-
-        // 💡 Firestore にデータがあれば実データを表示、なければデモデータ表示
-        if (friendList.length > 0) {
-          setFriends(friendList);
-          setExchangeCount(friendList.length);
-        }
-
-        setLoading(false);
-      },
-      (error) => {
-        console.error('Firestore 受信エラー (デモデータを表示します):', error);
-        setLoading(false);
       }
-    );
+      index++; // インデックスをインクリメント
+    });
+
+    if (friendList.length > 0) {
+      setFriends(friendList);
+      setExchangeCount(friendList.length);
+    }
+
+    setLoading(false);
+  },
+  (error) => {
+    console.error('Firestore 受信エラー (デモデータを表示します):', error);
+    setLoading(false);
+  }
+);
 
     return () => unsubscribe();
   }, []);
@@ -124,17 +134,22 @@ export default function HomeScreen() {
 
       {/* ノート風背景 & アバター配置 */}
       <View style={styles.notebookContainer}>
+        {/* 背景の罫線 */}
         <View style={styles.linesBackground}>
           {[...Array(9)].map((_, i) => (
             <View key={i} style={styles.line} />
           ))}
         </View>
 
-        <ScrollView contentContainerStyle={styles.avatarCloud} showsVerticalScrollIndicator={false}>
+        {/* 💡 アバターをランダム配置するためのスクロールエリア */}
+        <ScrollView
+          contentContainerStyle={styles.avatarCloudContainer}
+          showsVerticalScrollIndicator={false}
+        >
           {friends.map((item, index) => {
-            // 画像のようにキュッと密集させるためのマージン計算
-            const defaultOffset = index % 2 === 0 ? 30 : -35;
-            const marginOffset = item.offsetX ?? defaultOffset;
+            const topPos = item.top ?? 20 + index * 60;
+            const leftPos = item.left ?? (index % 2 === 0 ? '15%' : '50%');
+            const zIndexVal = item.zIndex ?? index;
 
             return (
               <View
@@ -142,21 +157,19 @@ export default function HomeScreen() {
                 style={[
                   styles.avatarWrapper,
                   {
-                    marginLeft: marginOffset,
-                    // 2番目以降のアバターを上に重ねてギュッとまとめる
-                    marginTop: index === 0 ? 10 : -35,
-                    zIndex: index,
+                    top: topPos,
+                    left: leftPos as any,
+                    zIndex: zIndexVal,
                   },
                 ]}
               >
-                <View style={styles.avatarCircle}>
-                  <AvatarPreview
-                    color={item.avatar.color}
-                    eye={item.avatar.eye}
-                    brow={item.avatar.brow}
-                    mouth={item.avatar.mouth}
-                  />
-                </View>
+                <AvatarPreview
+                  color={item.avatar.color}
+                  eye={item.avatar.eye}
+                  brow={item.avatar.brow}
+                  mouth={item.avatar.mouth}
+                  size={120} // ホーム画面用の扱いやすいサイズ
+                />
 
                 {item.isNew && (
                   <View style={styles.newBadge}>
@@ -246,35 +259,23 @@ const styles = StyleSheet.create({
     backgroundColor: '#E0DCD7',
     width: '100%',
   },
-  avatarCloud: {
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingBottom: 20,
+  avatarCloudContainer: {
+    height: 480, // 💡 アバターが散らばる自由領域の高さ
+    position: 'relative',
     zIndex: 1,
   },
   avatarWrapper: {
-    position: 'relative',
-  },
-  avatarCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 3.5,
-    borderColor: '#000',
-    backgroundColor: '#fff',
-    overflow: 'hidden',
-    justifyContent: 'center',
-    alignItems: 'center',
+    position: 'absolute', // 💡 top / left で自由に散らばせる
   },
   newBadge: {
     position: 'absolute',
-    top: -6,
-    right: -12,
+    top: -4,
+    right: -8,
     backgroundColor: '#E7FD54',
     borderWidth: 2,
     borderColor: '#000',
     paddingHorizontal: 6,
-    paddingVertical: 3,
+    paddingVertical: 2,
     borderRadius: 6,
     transform: [{ rotate: '12deg' }],
     zIndex: 10,
@@ -315,27 +316,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
-  },
-  bottomTab: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: '#E5E7EB',
-  },
-  tabItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  tabLabel: {
-    fontSize: 11,
-    color: '#8E8E93',
-    marginTop: 4,
-    fontWeight: 'bold',
-  },
-  activeTabLabel: {
-    color: '#000',
   },
 });
