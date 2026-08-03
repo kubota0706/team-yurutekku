@@ -1,92 +1,157 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert, ImageBackground, Keyboard, TouchableWithoutFeedback } from 'react-native'; 
-import { useRouter } from 'expo-router';
-import { loginStyles } from '../styles/loginStyles';
-import { Ionicons } from '@expo/vector-icons'; // 🌟 SNSアイコン用
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  ScrollView,
+  SafeAreaView,
+  Image,
+  ImageBackground, // 💡 画像を背景として使用するためにインポート
+} from 'react-native';
+import { styles } from '../styles/loginStyles'; // 💡 スタイルファイルを分離
+
+// 💡 画像のパス。環境に合わせて調整してください。
+const bgImageSource = require('@/assets/login.png'); // ここに背景画像のパスを指定してください
+// (例) もし同じ階層なら require('./grid-bg.png') など
+// もし assets フォルダに置いていない場合は、コメントアウトしたままで、ダミーのロゴ画像（パターンB）の手法を取ります。
+// assets フォルダへの配置を推奨します。
+
+type AuthMode = 'login' | 'signup' | 'sent';
 
 export default function LoginScreen() {
-  const router = useRouter();
+  const [mode, setMode] = useState<AuthMode>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
-  // 🌟 SNSボタンを押した時のダミー関数
-  const handleDummyPress = (provider: string) => {
-    Alert.alert(`${provider}ログイン`, `${provider}でログインします。`);
-  };
-
-  return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-      <ImageBackground 
-        source={require('@/assets/login-bg.png')} 
-        style={loginStyles.container}
-        resizeMode="cover" 
-      >
-        {/* ロゴ部分 */}
-        {/* <Text style={loginStyles.logoText}>ろご</Text> */}
-
-        {/* 白いカード */}
-        <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
-          <View style={loginStyles.card}>
-            <Text style={loginStyles.cardTitle}>ログイン</Text>
-
-            {/* メールアドレス入力欄 */}
-            <View style={loginStyles.inputContainer}>
-              <Text style={loginStyles.inputLabel}>メールアドレス</Text>
+  // 💡 コンテンツをレンダリングする関数
+  const renderContent = () => {
+    switch (mode) {
+      case 'login':
+        return (
+          <View style={styles.card}>
+            <Text style={styles.title}>ログイン</Text>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>メールアドレス</Text>
               <TextInput
-                style={loginStyles.input}
-                placeholder="Ecccon@gmail.com"
-                placeholderTextColor="#A0A0A0"
+                style={styles.input}
+                placeholder="yurutekku@example.com"
                 value={email}
                 onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
               />
             </View>
 
-            {/* パスワード入力欄 */}
-            <View style={loginStyles.inputContainer}>
-              <Text style={loginStyles.inputLabel}>パスワード</Text>
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>パスワード</Text>
               <TextInput
-                style={loginStyles.input}
-                placeholder="PassWard"
-                placeholderTextColor="#A0A0A0"
+                style={styles.input}
+                placeholder=""
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry={true}
               />
             </View>
 
-            <TouchableOpacity onPress={() => Alert.alert("ヘルプ", "パスワード再設定へ")}>
-              <Text style={loginStyles.forgotText}>パスワードが不明な場合</Text>
+            <TouchableOpacity style={styles.forgotBtn}>
+              <Text style={styles.forgotText}>パスワードを忘れた場合</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity style={loginStyles.loginButton} onPress={() => Alert.alert("ログイン")}>
-              <Text style={loginStyles.loginButtonText}>ログイン</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity style={loginStyles.registerButton} onPress={() => Alert.alert("新規登録")}>
-              <Text style={loginStyles.registerButtonText}>新規登録</Text>
-            </TouchableOpacity>
-
-            {/* ーーー SNSログインボタンエリア ーーー */}
-            <View style={loginStyles.snsButtonRow}>
-              {/* Googleボタン */}
-              <TouchableOpacity style={[loginStyles.snsButton, loginStyles.googleButton]} onPress={() => handleDummyPress("Google")} activeOpacity={0.7}>
-                <Ionicons name="logo-google" size={26} color="#EA4335" />
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.primaryBtn} onPress={() => console.log('Login')}>
+                <Text style={styles.primaryBtnText}>ログイン</Text>
               </TouchableOpacity>
-
-              {/* Appleボタン */}
-              <TouchableOpacity style={[loginStyles.snsButton, loginStyles.appleButton]} onPress={() => handleDummyPress("Apple")} activeOpacity={0.7}>
-                <Ionicons name="logo-apple" size={26} color="#FFFFFF" />
-              </TouchableOpacity>
-
-              {/* Discordボタン */}
-              <TouchableOpacity style={[loginStyles.snsButton, loginStyles.discordButton]} onPress={() => handleDummyPress("Discord")} activeOpacity={0.7}>
-                <Ionicons name="logo-discord" size={26} color="#FFFFFF" />
+              <TouchableOpacity style={styles.secondaryBtn} onPress={() => setMode('signup')}>
+                <Text style={styles.secondaryBtnText}>新規登録</Text>
               </TouchableOpacity>
             </View>
-
           </View>
-        </TouchableWithoutFeedback>
-      </ImageBackground>
-    </TouchableWithoutFeedback>
+        );
+
+      case 'signup':
+        return (
+          <View style={styles.card}>
+            <Text style={styles.title}>新規登録</Text>
+            
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>メールアドレス</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="yurutekku@example.com"
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={styles.inputGroup}>
+              <Text style={styles.label}>パ ス ワ ー ド</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry={true}
+              />
+            </View>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.primaryBtn} onPress={() => setMode('sent')}>
+                <Text style={styles.primaryBtnText}>次へ</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.secondaryBtn} onPress={() => setMode('login')}>
+                <Text style={styles.secondaryBtnText}>ログインに戻る</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+
+      case 'sent':
+        return (
+          <View style={styles.card}>
+            <Text style={styles.title}>メールを送信しました</Text>
+            
+            <Text style={styles.messageText}>
+              入力されたメールアドレスに認証メールを送信しました。メール内のリンクをクリックして登録を完了させてください。
+            </Text>
+
+            <View style={styles.buttonContainer}>
+              <TouchableOpacity style={styles.primaryBtn} onPress={() => setMode('login')}>
+                <Text style={styles.primaryBtnText}>閉じる</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        );
+    }
+  };
+
+  return (
+    // 💡 ImageBackground をルートとして使用
+    <ImageBackground
+      source={bgImageSource} // 💡 差し込みたい画像を指定
+      style={styles.backgroundImage}
+      resizeMode="cover" // 💡 画面全体を覆うように設定
+    >
+      <SafeAreaView style={styles.safeArea}>
+        <ScrollView contentContainerStyle={styles.scrollContainer}>
+          <View style={styles.logoContainer}>
+            {/* 💡 パターンA: ロゴ画像がある場合 */}
+            <Image
+              source={require('@/assets/logo.png')}
+              style={styles.logoImage}
+              resizeMode="contain"
+            />
+            
+            {/* 💡 パターンB: ロゴ画像がない場合（ダミー） */}
+            {/* <Text style={{fontSize: 32, fontWeight: '900', color: '#4E3117'}}>YURUTEKKU</Text> */}
+          </View>
+
+          {renderContent()}
+
+        </ScrollView>
+      </SafeAreaView>
+    </ImageBackground>
   );
 }

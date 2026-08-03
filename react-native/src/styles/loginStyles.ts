@@ -1,138 +1,126 @@
-import { StyleSheet, Dimensions } from 'react-native';
+import { StyleSheet } from 'react-native';
 
-const { width } = Dimensions.get('window');
-
-export const loginStyles = StyleSheet.create({
-  container: {
+export const styles = StyleSheet.create({
+  // 💡 背景画像用のスタイル
+  backgroundImage: {
     flex: 1,
-    backgroundColor: '#FFE352', // カンプの鮮やかな黄色
+    width: '100%',
+    height: '100%',
+  },
+  // 💡 SafeAreaView 用のスタイル
+  safeArea: {
+    flex: 1,
+  },
+  scrollContainer: {
+    flexGrow: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    paddingHorizontal: 24,
+    paddingVertical: 40,
   },
-  bgCircle: {
-    position: 'absolute',
-    backgroundColor: '#FFF19E', // 背景に浮いている薄い黄色の円
-    opacity: 0.6,
+  logoContainer: {
+    width: '100%',
+    height: 120,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 25,
+    zIndex: 10,
   },
-  logoText: {
-    fontSize: 56,
-    fontWeight: 'bold',
-    color: '#FFFFFF',
-    marginBottom: 24,
-    letterSpacing: 4,
+  logoImage: {
+    width: 440,
+    height: 220,
   },
   card: {
-    width: width * 0.88,
-    backgroundColor: '#FFFDF0', // カンプ特有の、少し温かみのあるアイボリーホワイト
-    borderRadius: 36, // カンプのような大きな丸み
-    paddingTop: 32,
-    paddingHorizontal: 24,
-    paddingBottom: 36,
-    alignItems: 'center',
-    // 影の設定（カンプの下側のやわらかいシャドウ）
-    shadowColor: '#A38F1A',
-    shadowOffset: { width: 0, height: 12 },
-    shadowOpacity: 0.3,
-    shadowRadius: 16,
-    elevation: 10,
-  },
-  cardTitle: { 
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#332211', // 少し茶色みがかった柔らかい黒
-    marginBottom: 20,
-    letterSpacing: 2,
-  },
-  inputContainer: {
     width: '100%',
-    marginBottom: 14,
+    backgroundColor: 'rgba(255, 255, 240, 0.95)',
+    borderRadius: 36,
+    paddingHorizontal: 28,
+    paddingTop: 32,
+    paddingBottom: 40,
+    borderWidth: 5,
+    borderColor: '#FFD600',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.15,
+    shadowRadius: 12,
+    elevation: 8,
   },
-  inputLabel: {
+  title: {
+    fontSize: 24,
+    fontWeight: '900',
+    color: '#3D2817',
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  inputGroup: {
+    marginBottom: 16,
+  },
+  label: {
     fontSize: 14,
     fontWeight: 'bold',
-    color: '#553311',
+    color: '#3D2817',
     marginBottom: 6,
-    paddingLeft: 4,
   },
   input: {
-    width: '100%',
+    backgroundColor: '#FFF',
+    borderWidth: 2.5,
+    borderColor: '#4E3117',
+    borderRadius: 14,
     height: 48,
-    borderWidth: 1.5,
-    borderColor: '#443322', // クレよんのような可愛い黒い細枠
-    borderRadius: 12,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
+    paddingHorizontal: 16,
     fontSize: 16,
+    color: '#3D2817',
   },
-  forgotContainer: {
-    width: '100%',
-    alignItems: 'flex-end',
+  forgotBtn: {
+    alignSelf: 'flex-end',
+    marginTop: 4,
     marginBottom: 24,
   },
   forgotText: {
-    fontSize: 13,
+    fontSize: 12,
     fontWeight: 'bold',
-    color: '#553311',
-    textDecorationLine: 'underline', // 下線
+    color: '#3D2817',
   },
-  loginButton: {
-    width: '70%',
-    height: 54,
-    backgroundColor: '#4293FF', // カンプ通りの爽やかな青
-    borderRadius: 27,
-    justifyContent: 'center',
+  messageText: {
+    fontSize: 15,
+    fontWeight: 'bold',
+    color: '#3D2817',
+    textAlign: 'center',
+    lineHeight: 24,
+    marginVertical: 16,
+  },
+  buttonContainer: {
+    gap: 12,
     alignItems: 'center',
-    marginBottom: 14,
-  },
-  loginButtonText: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-  },
-  registerButton: {
-    width: '70%',
-    height: 54,
-    backgroundColor: '#FFFFFF',
-    borderWidth: 2,
-    borderColor: '#4293FF', // 青いフチ取り
-    borderRadius: 27,
-    justifyContent: 'center',
-    alignItems: 'center',
-    marginBottom: 28,
-  },
-  registerButtonText: {
-    color: '#4293FF',
-    fontSize: 16,
-    fontWeight: 'bold',
-    letterSpacing: 2,
-  },
-  
-  // 🌟 ここから下が結合されたSNS用のスタイルです
-  snsButtonRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 18,
     width: '100%',
   },
-  snsButton: {
-    width: 52,
-    height: 52,
-    borderRadius: 26,
+  primaryBtn: {
+    backgroundColor: '#3B97FF',
+    width: 200,
+    height: 48,
+    borderRadius: 24,
     justifyContent: 'center',
     alignItems: 'center',
-    borderWidth: 1.5,
-    borderColor: '#E0DCC5',
+    elevation: 2,
   },
-  googleButton: {
-    backgroundColor: '#FFFFFF',
+  primaryBtnText: {
+    color: '#FFF',
+    fontSize: 16,
+    fontWeight: '900',
   },
-  appleButton: {
-    backgroundColor: '#000000',
-    borderColor: '#000000', // 白いフチが見えないよう背景と同色に調整
+  secondaryBtn: {
+    backgroundColor: '#FFF',
+    borderWidth: 2.5,
+    borderColor: '#3B97FF',
+    width: 200,
+    height: 48,
+    borderRadius: 24,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  discordButton: {
-    backgroundColor: '#5865F2',
-    borderColor: '#5865F2', // 枠線をDiscordカラーに同化
+  secondaryBtnText: {
+    color: '#3B97FF',
+    fontSize: 16,
+    fontWeight: '900',
   },
 });
