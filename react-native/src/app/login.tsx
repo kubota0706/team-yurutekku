@@ -1,18 +1,20 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Alert, ImageBackground, Keyboard, TouchableWithoutFeedback } from 'react-native'; 
 import { useRouter } from 'expo-router';
 import { loginStyles } from '../styles/loginStyles';
 import { Ionicons } from '@expo/vector-icons'; // 🌟 SNSアイコン用
+import { useAuthContext } from '@/atoms/authContext';
 
 export default function LoginScreen() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-
   // 🌟 SNSボタンを押した時のダミー関数
   const handleDummyPress = (provider: string) => {
     Alert.alert(`${provider}ログイン`, `${provider}でログインします。`);
   };
+
+  const { user, signInWithGoogle, isSigningIn } = useAuthContext()
 
   return (
     <TouchableWithoutFeedback onPress={Keyboard.dismiss} accessible={false}>
@@ -69,7 +71,7 @@ export default function LoginScreen() {
             {/* ーーー SNSログインボタンエリア ーーー */}
             <View style={loginStyles.snsButtonRow}>
               {/* Googleボタン */}
-              <TouchableOpacity style={[loginStyles.snsButton, loginStyles.googleButton]} onPress={() => handleDummyPress("Google")} activeOpacity={0.7}>
+              <TouchableOpacity style={[loginStyles.snsButton, loginStyles.googleButton]} disabled={isSigningIn} onPress={() => signInWithGoogle()} activeOpacity={0.7}>
                 <Ionicons name="logo-google" size={26} color="#EA4335" />
               </TouchableOpacity>
 

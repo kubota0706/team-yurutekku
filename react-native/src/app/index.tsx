@@ -42,11 +42,6 @@ export default function ModalScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* 📌 固定の主要ページリンク（既存のコードをそのまま維持） */}
-      <Link href="/register" style={styles.link}>
-        <Text style={styles.linkText}>プロフィール登録を始める</Text>
-      </Link>
-
       <Link href="/profile" style={styles.link}>
         <Text style={styles.linkText}>テスト用プロフィールを確認</Text>
       </Link>
@@ -62,9 +57,7 @@ export default function ModalScreen() {
     </ScrollView>
   )
 
-  return (
-    <Redirect href="/profileRegisterBase" />    
-  );
+  return null
 }
 
 const styles = StyleSheet.create({
